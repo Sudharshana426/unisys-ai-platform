@@ -22,6 +22,12 @@ import Calendar from "./pages/Calendar";
 import AIGuidance from "./pages/AIGuidance";
 import Pomodoro from "./pages/Pomodoro";
 import TodoList from "./pages/TodoList";
+import Certifications from "./pages/Certifications";
+import Internships from "./pages/Internships";
+import LearningResources from "./pages/LearningResources";
+import MockInterviews from "./pages/MockInterviews";
+import Opportunities from "./pages/Opportunities";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -129,6 +135,42 @@ const App = () => {
             <Route path="/todo" element={
               isLoggedIn ? 
               <MainLayout><TodoList /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+
+            <Route path="/certifications" element={
+              isLoggedIn ? 
+              <MainLayout><Certifications /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            <Route path="/internships" element={
+              isLoggedIn ? 
+              <MainLayout><Internships /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            <Route path="/resources" element={
+              isLoggedIn ? 
+              <MainLayout><LearningResources /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            <Route path="/interviews" element={
+              isLoggedIn ? 
+              <MainLayout><MockInterviews /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            <Route path="/opportunities" element={
+              isLoggedIn ? 
+              <MainLayout><Opportunities /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            <Route path="/settings" element={
+              isLoggedIn ? 
+              <MainLayout><Settings /></MainLayout> : 
               <Navigate to="/login" replace />
             } />
             
