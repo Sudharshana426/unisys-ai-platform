@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Code, Eye, GitBranch, GitCommit, GitFork, Github, GitPullRequest, Star, Users } from "lucide-react";
+import { Code, Eye, GitBranch, GitCommit, GitFork, Github as GithubIcon, GitPullRequest, Star, Users } from "lucide-react";
 
 const projects = [
   {
@@ -110,7 +110,7 @@ const languageColors: Record<string, string> = {
   "C#": "bg-green-600"
 };
 
-const Github = () => {
+const GithubPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -121,7 +121,7 @@ const Github = () => {
         
         <div className="flex gap-2">
           <Button variant="outline">
-            <Github className="mr-2 h-4 w-4" />
+            <GithubIcon className="mr-2 h-4 w-4" />
             Refresh GitHub Data
           </Button>
           <Button>
@@ -141,7 +141,7 @@ const Github = () => {
             <div>
               <CardTitle className="text-2xl">Rahul Sharma</CardTitle>
               <CardDescription className="flex items-center">
-                <Github className="h-4 w-4 mr-1" /> rahulsharma42
+                <GithubIcon className="h-4 w-4 mr-1" /> rahulsharma42
               </CardDescription>
             </div>
           </div>
@@ -236,7 +236,7 @@ const Github = () => {
                     View Project
                   </Button>
                   <Button size="sm">
-                    <GitHub className="mr-2 h-4 w-4" />
+                    <GithubIcon className="mr-2 h-4 w-4" />
                     Open in GitHub
                   </Button>
                 </div>
@@ -302,4 +302,4 @@ const Github = () => {
   );
 };
 
-export default Github;
+export default GithubPage;
