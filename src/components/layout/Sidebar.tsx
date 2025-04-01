@@ -41,15 +41,28 @@ const navItems = [
   { name: 'Settings', path: '/settings', icon: Settings }
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  collapsed?: boolean;
+}
+
+export const Sidebar = ({ collapsed = false }: SidebarProps) => {
   const location = useLocation();
   
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 hidden md:block shadow-md transform transition-transform duration-150 ease-in-out bg-white">
+    <aside 
+      className={cn(
+        "fixed left-0 top-0 z-40 h-screen shadow-md transform transition-all duration-300 ease-in-out bg-white",
+        collapsed ? "w-16" : "w-64",
+        "hidden md:block"
+      )}
+    >
       <div className="h-full px-3 py-4 flex flex-col">
-        <div className="flex items-center mb-6 pl-2">
+        <div className={cn(
+          "flex items-center mb-6 pl-2", 
+          collapsed ? "justify-center" : ""
+        )}>
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-brand-blue to-brand-purple flex items-center justify-center text-white font-bold text-xl">DS</div>
-          <span className="text-xl font-semibold ml-2 gradient-heading">DeepSeek</span>
+          {!collapsed && <span className="text-xl font-semibold ml-2 gradient-heading">DeepSeek</span>}
         </div>
 
         <div className="flex flex-col space-y-1 flex-1 overflow-y-auto">
@@ -58,24 +71,27 @@ export const Sidebar = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center px-2 py-2 text-sm font-medium rounded-lg",
+                "flex items-center py-2 text-sm font-medium rounded-lg",
+                collapsed ? "justify-center px-2" : "px-2",
                 location.pathname === item.path
                   ? "bg-primary text-white"
                   : "text-gray-700 hover:bg-gray-100"
               )}
             >
               <item.icon className="h-5 w-5 mr-3" />
-              <span>{item.name}</span>
+              {!collapsed && <span>{item.name}</span>}
             </Link>
           ))}
         </div>
 
-        <div className="pt-2">
-          <div className="px-4 py-3 mt-4 rounded-lg bg-gradient-to-r from-brand-blue/10 to-brand-purple/10">
-            <p className="text-sm font-medium">Need help?</p>
-            <p className="text-xs text-gray-500 mt-1">Ask your AI assistant or contact support</p>
+        {!collapsed && (
+          <div className="pt-2">
+            <div className="px-4 py-3 mt-4 rounded-lg bg-gradient-to-r from-brand-blue/10 to-brand-purple/10">
+              <p className="text-sm font-medium">Need help?</p>
+              <p className="text-xs text-gray-500 mt-1">Ask your AI assistant or contact support</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );
