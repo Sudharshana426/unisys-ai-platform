@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Code, Eye, GitBranch, GitCommit, GitFork, GitHub, GitPullRequest, Star, Users } from "lucide-react";
+import { Code, Eye, GitBranch, GitCommit, GitFork, Github, GitPullRequest, Star, Users } from "lucide-react";
 
 const projects = [
   {
@@ -122,7 +121,7 @@ const Github = () => {
         
         <div className="flex gap-2">
           <Button variant="outline">
-            <GitHub className="mr-2 h-4 w-4" />
+            <Github className="mr-2 h-4 w-4" />
             Refresh GitHub Data
           </Button>
           <Button>
@@ -142,7 +141,7 @@ const Github = () => {
             <div>
               <CardTitle className="text-2xl">Rahul Sharma</CardTitle>
               <CardDescription className="flex items-center">
-                <GitHub className="h-4 w-4 mr-1" /> rahulsharma42
+                <Github className="h-4 w-4 mr-1" /> rahulsharma42
               </CardDescription>
             </div>
           </div>
