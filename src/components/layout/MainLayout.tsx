@@ -3,6 +3,7 @@ import React from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { AIAssistant } from '../ai/AIAssistant';
+import { MobileNav } from './MobileNav';
 
 interface MainLayoutProps {
   children: React.ReactNode;
