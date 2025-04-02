@@ -26,6 +26,7 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -46,32 +47,43 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginData(prev => ({ ...prev, [name]: value }));
+    // Clear previous errors when user types
+    setError(null);
   };
 
   const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSignupData(prev => ({ ...prev, [name]: value }));
+    // Clear previous errors when user types
+    setError(null);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
     try {
+      console.log('Attempting login with:', loginData.email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
       
       if (error) {
+        console.error('Login error:', error);
         throw error;
       }
       
+      console.log('Login successful:', data);
       toast.success('Login successful!');
       onSuccessfulLogin();
       navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in');
+      console.error('Login failed:', error);
+      const errorMessage = error.message || 'Failed to sign in. Please check your network connection.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -80,14 +92,17 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
     if (signupData.password !== signupData.confirmPassword) {
+      setError('Passwords do not match');
       toast.error('Passwords do not match');
       setIsLoading(false);
       return;
     }
     
     try {
+      console.log('Attempting signup with:', signupData.email);
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
@@ -97,16 +112,22 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
       });
       
       if (error) {
+        console.error('Signup error:', error);
         throw error;
       }
       
       if (data.user?.identities?.length === 0) {
+        setError('Email already in use. Please try logging in instead.');
         toast.error('Email already in use. Please try logging in instead.');
       } else {
+        console.log('Signup successful:', data);
         toast.success('Sign up successful! Please check your email for verification.');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign up');
+      console.error('Signup failed:', error);
+      const errorMessage = error.message || 'Failed to sign up. Please check your network connection.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -114,8 +135,10 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
+    setError(null);
     
     try {
+      console.log('Attempting GitHub login');
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
@@ -124,12 +147,17 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
       });
       
       if (error) {
+        console.error('GitHub login error:', error);
         throw error;
       }
       
+      console.log('GitHub OAuth initiated:', data);
       // Auth redirect will happen automatically
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with GitHub');
+      console.error('GitHub login failed:', error);
+      const errorMessage = error.message || 'Failed to sign in with GitHub. Please check your network connection.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };
@@ -152,6 +180,12 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
               Sign in or create an account to access your personalized learning dashboard
             </CardDescription>
           </CardHeader>
+          
+          {error && (
+            <div className="mx-6 mb-4 p-3 bg-destructive/10 border border-destructive rounded-md text-destructive text-sm">
+              {error}
+            </div>
+          )}
           
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid grid-cols-2 w-full">
@@ -188,6 +222,7 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
                           }
                           
                           try {
+                            setIsLoading(true);
                             const { error } = await supabase.auth.resetPasswordForEmail(
                               loginData.email,
                               { redirectTo: `${window.location.origin}/reset-password` }
@@ -197,6 +232,8 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
                             toast.success('Password reset email sent! Please check your inbox.');
                           } catch (error: any) {
                             toast.error(error.message || 'Failed to send reset email.');
+                          } finally {
+                            setIsLoading(false);
                           }
                         }}
                       >
