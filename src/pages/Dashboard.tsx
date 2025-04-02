@@ -1,332 +1,261 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { 
-  BarChart, 
-  Calendar,
-  Code, 
-  FileText, 
-  GraduationCap, 
-  MessageSquare, 
-  Award, 
-  ArrowUp, 
-  ArrowDown, 
-  Clock, 
-  ExternalLink,
-  TrendingUp
-} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon, BookOpen, Award, FileText, Activity, Code, Github, Briefcase, BarChart2, Clock, ListTodo, GraduationCap } from "lucide-react";
+import { Calendar } from '@/components/ui/calendar';
+import { Link } from 'react-router-dom';
 
-export default function Dashboard() {
-  // Dummy data
-  const upcomingEvents = [
-    { id: 1, title: 'Data Structures Assignment Due', date: '2023-10-25', time: '11:59 PM', type: 'assignment' },
-    { id: 2, title: 'Machine Learning Midterm', date: '2023-10-28', time: '10:00 AM', type: 'exam' },
-    { id: 3, title: 'HackTech 2023 Registration', date: '2023-10-30', time: '5:00 PM', type: 'event' }
-  ];
-
-  const progressItems = [
-    { id: 1, title: 'Data Structures', progress: 85, color: 'bg-blue-500' },
-    { id: 2, title: 'Machine Learning', progress: 72, color: 'bg-purple-500' },
-    { id: 3, title: 'Web Development', progress: 60, color: 'bg-green-500' },
-    { id: 4, title: 'Database Systems', progress: 45, color: 'bg-orange-500' }
-  ];
-
-  const recentActivities = [
-    { id: 1, title: 'Completed LeetCode Challenge', time: '2 hours ago', icon: Code },
-    { id: 2, title: 'Submitted Machine Learning Assignment', time: '1 day ago', icon: FileText },
-    { id: 3, title: 'Mock Interview Completed', time: '3 days ago', icon: MessageSquare },
-    { id: 4, title: 'Received Certificate: Advanced Python', time: '1 week ago', icon: Award }
-  ];
-
-  const timelineItems = [
-    { id: 1, title: 'Complete Database Assignment', time: 'Today', status: 'due', badge: 'High Priority' },
-    { id: 2, title: 'Review Machine Learning Notes', time: 'Tomorrow', status: 'planned' },
-    { id: 3, title: 'Practice LeetCode Problems', time: 'In 3 days', status: 'planned' },
-  ];
-
-  const stats = [
-    { title: 'LeetCode Problems', value: '85', change: '+12%', trend: 'up' },
-    { title: 'Project Commits', value: '143', change: '+8%', trend: 'up' },
-    { title: 'Course Completion', value: '68%', change: '+5%', trend: 'up' },
-    { title: 'Certifications', value: '7', change: '0', trend: 'neutral' }
-  ];
-
+const Dashboard = () => {
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  
   return (
-    <div className="container mx-auto pt-4 pb-16 md:ml-64">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold gradient-heading">Welcome back, Rahul!</h1>
-        <p className="text-muted-foreground mt-1">Here's an overview of your learning journey</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold gradient-heading">Student Dashboard</h1>
+        <p className="text-muted-foreground">Welcome back to DeepSeek</p>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6 flex justify-between">
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Tasks</CardTitle>
+            <CardDescription>Your most recent tasks</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full mt-1.5 bg-red-500"></div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                <h2 className="text-3xl font-bold mt-1">{stat.value}</h2>
-                <p className={`text-xs font-medium flex items-center mt-1 ${stat.trend === 'up' ? 'text-green-500' : stat.trend === 'down' ? 'text-red-500' : 'text-muted-foreground'}`}>
-                  {stat.trend === 'up' ? <ArrowUp className="mr-1 h-3 w-3" /> : stat.trend === 'down' ? <ArrowDown className="mr-1 h-3 w-3" /> : null}
-                  {stat.change}
-                </p>
+                <p className="font-medium">Complete ML Assignment</p>
+                <p className="text-xs text-muted-foreground">Due: Tomorrow</p>
               </div>
-              <div className={`rounded-full h-12 w-12 flex items-center justify-center ${
-                index === 0 ? 'bg-blue-100 text-blue-500' :
-                index === 1 ? 'bg-purple-100 text-purple-500' :
-                index === 2 ? 'bg-green-100 text-green-500' : 'bg-orange-100 text-orange-500'
-              }`}>
-                {index === 0 ? <Code className="h-6 w-6" /> :
-                 index === 1 ? <FileText className="h-6 w-6" /> :
-                 index === 2 ? <GraduationCap className="h-6 w-6" /> : <Award className="h-6 w-6" />}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle>Learning Progress</CardTitle>
-            <CardDescription>Your course progress over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] flex items-end justify-between">
-              {[40, 55, 45, 70, 65, 80, 90].map((value, index) => (
-                <div key={index} className="relative w-[12%]">
-                  <div
-                    className="bg-gradient-to-t from-primary to-brand-purple rounded-t-md"
-                    style={{ height: `${value * 2}px` }}
-                  ></div>
-                  <span className="absolute top-[-25px] left-1/2 transform -translate-x-1/2 text-xs">
-                    {`W${index + 1}`}
-                  </span>
-                </div>
-              ))}
             </div>
-            <div className="mt-8 space-y-4">
-              {progressItems.map((item) => (
-                <div key={item.id} className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{item.title}</span>
-                    <span className="text-sm font-medium">{item.progress}%</span>
-                  </div>
-                  <Progress value={item.progress} className={item.color} />
-                </div>
-              ))}
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full mt-1.5 bg-amber-500"></div>
+              <div>
+                <p className="font-medium">Research Paper Draft</p>
+                <p className="text-xs text-muted-foreground">Due: Oct 10</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full mt-1.5 bg-green-500"></div>
+              <div>
+                <p className="font-medium">Prepare for Mock Interview</p>
+                <p className="text-xs text-muted-foreground">Due: Oct 15</p>
+              </div>
             </div>
           </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Upcoming Events</CardTitle>
-            <CardDescription>Deadlines and important dates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="flex items-start space-x-3">
-                  <div className={`rounded-full p-2 ${
-                    event.type === 'assignment' ? 'bg-blue-100 text-blue-500' :
-                    event.type === 'exam' ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500'
-                  }`}>
-                    {event.type === 'assignment' ? <FileText className="h-4 w-4" /> :
-                     event.type === 'exam' ? <GraduationCap className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{event.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {event.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full mt-2" size="sm">
-                <Calendar className="mr-2 h-4 w-4" />
-                View All Events
+          <CardFooter>
+            <Link to="/todo">
+              <Button variant="outline" size="sm">
+                <ListTodo className="mr-2 h-4 w-4" /> Manage Tasks
               </Button>
-            </div>
-          </CardContent>
+            </Link>
+          </CardFooter>
         </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
-            <CardDescription>Your latest learning activities</CardDescription>
+            <CardTitle>Study Progress</CardTitle>
+            <CardDescription>This week's learning activities</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="rounded-full bg-muted p-2">
-                    <activity.icon className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex justify-between items-center mb-1 text-sm">
+                <span>Machine Learning</span>
+                <span className="font-medium">60%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full">
+                <div className="bg-blue-600 h-full rounded-full" style={{ width: "60%" }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1 text-sm">
+                <span>Data Structures</span>
+                <span className="font-medium">85%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full">
+                <div className="bg-green-600 h-full rounded-full" style={{ width: "85%" }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1 text-sm">
+                <span>Web Development</span>
+                <span className="font-medium">40%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full">
+                <div className="bg-amber-600 h-full rounded-full" style={{ width: "40%" }}></div>
+              </div>
             </div>
           </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>To-Do List</CardTitle>
-            <CardDescription>Tasks that need your attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {timelineItems.map((item) => (
-                <div key={item.id} className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${
-                    item.status === 'due' ? 'bg-red-500' : 'bg-green-500'
-                  }`}></div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">{item.time}</p>
-                    </div>
-                    {item.badge && (
-                      <span className="inline-block text-xs bg-red-100 text-red-800 rounded-full px-2 py-0.5 mt-1">{item.badge}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full mt-2" size="sm">
-                <Clock className="mr-2 h-4 w-4" />
-                Manage Tasks
+          <CardFooter>
+            <Link to="/learning">
+              <Button variant="outline" size="sm">
+                <BookOpen className="mr-2 h-4 w-4" /> Continue Learning
               </Button>
-            </div>
-          </CardContent>
+            </Link>
+          </CardFooter>
         </Card>
-
+        
         <Card>
           <CardHeader>
-            <CardTitle>Personalized Recommendations</CardTitle>
-            <CardDescription>Based on your profile and goals</CardDescription>
+            <CardTitle>Calendar</CardTitle>
+            <CardDescription>October 2023</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="border rounded-lg p-3 bg-muted/30">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-sm">Advanced Data Structures Course</p>
-                    <p className="text-xs text-muted-foreground mt-1">Recommended based on your coding interests</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="border rounded-lg p-3 bg-muted/30">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-sm">Google Summer Internship</p>
-                    <p className="text-xs text-muted-foreground mt-1">Application deadline in 5 days</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="border rounded-lg p-3 bg-muted/30">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-sm">CodeJam Hackathon</p>
-                    <p className="text-xs text-muted-foreground mt-1">Register by Oct 30th</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <Button variant="outline" className="w-full" size="sm">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                More Recommendations
+            <Calendar 
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              className="w-full"
+            />
+          </CardContent>
+          <CardFooter>
+            <Link to="/calendar">
+              <Button variant="outline" size="sm">
+                <CalendarIcon className="mr-2 h-4 w-4" /> View Schedule
               </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <Card className="md:col-span-8">
+          <CardHeader>
+            <CardTitle>Latest Updates</CardTitle>
+            <CardDescription>Recent activities and announcements</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-4 py-1">
+              <p className="font-medium">New Internship Opportunities Available</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Check out the latest internships from Google, Microsoft, and Amazon.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">Today</p>
             </div>
+            <div className="border-l-4 border-amber-500 pl-4 py-1">
+              <p className="font-medium">Certificate in AI & ML - 30% Off</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Special discount for students. Limited time offer!
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">Yesterday</p>
+            </div>
+            <div className="border-l-4 border-green-500 pl-4 py-1">
+              <p className="font-medium">Campus Hackathon - Registration Open</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Form your team and register by October 15th.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">2 days ago</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-4">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Link to="/resume">
+              <Button variant="outline" className="w-full justify-start">
+                <FileText className="mr-2 h-4 w-4" /> Update Resume
+              </Button>
+            </Link>
+            <Link to="/achievements">
+              <Button variant="outline" className="w-full justify-start">
+                <Award className="mr-2 h-4 w-4" /> Log Achievement
+              </Button>
+            </Link>
+            <Link to="/academics">
+              <Button variant="outline" className="w-full justify-start">
+                <GraduationCap className="mr-2 h-4 w-4" /> Check Grades
+              </Button>
+            </Link>
+            <Link to="/swot">
+              <Button variant="outline" className="w-full justify-start">
+                <Activity className="mr-2 h-4 w-4" /> Update SWOT Analysis
+              </Button>
+            </Link>
+            <Link to="/coding">
+              <Button variant="outline" className="w-full justify-start">
+                <Code className="mr-2 h-4 w-4" /> Practice Coding
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Your Learning Analytics</CardTitle>
-          <CardDescription>Insights from your learning activities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h3 className="text-lg font-medium">Strong Areas</h3>
-              <ul className="mt-2 space-y-1">
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Data Structures & Algorithms
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Object-Oriented Programming
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Web Development
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium">Areas to Improve</h3>
-              <ul className="mt-2 space-y-1">
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                  Database Management
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                  System Design
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                  Machine Learning Fundamentals
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium">Recommended Actions</h3>
-              <ul className="mt-2 space-y-1">
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  Complete SQL tutorial
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  Join system design study group
-                </li>
-                <li className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  Watch recommended ML videos
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <Button className="mt-6">
-            <BarChart className="mr-2 h-4 w-4" />
-            View Detailed Analytics
-          </Button>
-        </CardContent>
-      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center">
+              <Github className="h-4 w-4 mr-2" /> GitHub Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">23</p>
+            <p className="text-xs text-muted-foreground">contributions this week</p>
+          </CardContent>
+          <CardFooter>
+            <Link to="/github">
+              <Button variant="ghost" size="sm" className="text-xs h-8">View Projects</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center">
+              <BookOpen className="h-4 w-4 mr-2" /> Learning
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">4.5</p>
+            <p className="text-xs text-muted-foreground">hours this week</p>
+          </CardContent>
+          <CardFooter>
+            <Link to="/learning">
+              <Button variant="ghost" size="sm" className="text-xs h-8">Study Materials</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center">
+              <Briefcase className="h-4 w-4 mr-2" /> Internships
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">12</p>
+            <p className="text-xs text-muted-foreground">new opportunities</p>
+          </CardContent>
+          <CardFooter>
+            <Link to="/internships">
+              <Button variant="ghost" size="sm" className="text-xs h-8">Apply Now</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center">
+              <Clock className="h-4 w-4 mr-2" /> Pomodoro
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">25:00</p>
+            <p className="text-xs text-muted-foreground">focus session</p>
+          </CardContent>
+          <CardFooter>
+            <Link to="/pomodoro">
+              <Button variant="ghost" size="sm" className="text-xs h-8">Start Timer</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

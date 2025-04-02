@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Award, Calendar, Download, ExternalLink, File, Filter, Plus, Search } from "lucide-react";
+import AddCertificationModal from "@/components/certifications/AddCertificationModal";
+import ViewCertificateModal from "@/components/certifications/ViewCertificateModal";
 
-const certifications = [
+const initialCertifications = [
   {
     id: 1,
     name: "AWS Certified Solutions Architect",
@@ -18,7 +20,9 @@ const certifications = [
     expiryDate: "Jan 2026",
     credentialID: "AWS-12345-CSA",
     skills: ["Cloud Architecture", "AWS Services", "Infrastructure Design"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop"
+    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
+    fileURL: "",
+    fileName: ""
   },
   {
     id: 2,
@@ -28,7 +32,9 @@ const certifications = [
     expiryDate: "Mar 2026",
     credentialID: "TF-78901-DEV",
     skills: ["Machine Learning", "Deep Learning", "TensorFlow", "Neural Networks"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop"
+    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
+    fileURL: "",
+    fileName: ""
   },
   {
     id: 3,
@@ -38,7 +44,9 @@ const certifications = [
     expiryDate: "N/A (No Expiry)",
     credentialID: "UD-56789-FSWD",
     skills: ["React", "Node.js", "MongoDB", "REST APIs"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop"
+    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
+    fileURL: "",
+    fileName: ""
   },
   {
     id: 4,
@@ -48,7 +56,9 @@ const certifications = [
     expiryDate: "Dec 2024",
     credentialID: "MS-24680-ADA",
     skills: ["Azure Services", "Cloud Development", "Azure Functions"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop"
+    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
+    fileURL: "",
+    fileName: ""
   },
   {
     id: 5,
@@ -58,7 +68,9 @@ const certifications = [
     expiryDate: "No Expiry",
     credentialID: "OCP-13579-JSP",
     skills: ["Java", "OOP", "Data Structures", "Algorithms"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop"
+    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
+    fileURL: "",
+    fileName: ""
   }
 ];
 
@@ -97,12 +109,25 @@ const recommendedCertifications = [
 
 const Certifications = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [certifications, setCertifications] = useState(initialCertifications);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
   
   const filteredCertifications = certifications.filter(cert => 
     cert.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     cert.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cert.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const handleAddCertification = (newCertification: any) => {
+    setCertifications([...certifications, newCertification]);
+  };
+
+  const viewCertificate = (certificate: any) => {
+    setSelectedCertificate(certificate);
+    setIsViewModalOpen(true);
+  };
   
   return (
     <div className="space-y-6">
@@ -117,7 +142,7 @@ const Certifications = () => {
             <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Certification
           </Button>
@@ -197,7 +222,10 @@ const Certifications = () => {
                     <Download className="mr-2 h-4 w-4" />
                     Export
                   </Button>
-                  <Button size="sm">
+                  <Button 
+                    size="sm" 
+                    onClick={() => viewCertificate(certification)}
+                  >
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View Certificate
                   </Button>
@@ -334,6 +362,18 @@ const Certifications = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <AddCertificationModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddCertification}
+      />
+      
+      <ViewCertificateModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        certificate={selectedCertificate}
+      />
     </div>
   );
 };

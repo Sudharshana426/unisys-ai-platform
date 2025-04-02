@@ -1,82 +1,109 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, GraduationCap, LineChart, BarChart3, Activity, BookOpen } from "lucide-react";
-
-const studentInfo = {
-  name: "Rahul Sharma",
-  regNo: "RA1811003010092",
-  branch: "Computer Science & Engineering",
-  batch: "2020-2024",
-  currentSemester: 7,
-  cgpa: 8.92,
-  credits: {
-    completed: 156,
-    total: 180
-  }
-};
-
-const semesters = [
-  { id: 1, name: "Semester 1", sgpa: 8.3, completed: true },
-  { id: 2, name: "Semester 2", sgpa: 8.6, completed: true },
-  { id: 3, name: "Semester 3", sgpa: 9.1, completed: true },
-  { id: 4, name: "Semester 4", sgpa: 9.0, completed: true },
-  { id: 5, name: "Semester 5", sgpa: 8.7, completed: true },
-  { id: 6, name: "Semester 6", sgpa: 9.2, completed: true },
-  { id: 7, name: "Semester 7", sgpa: 0.0, completed: false },
-  { id: 8, name: "Semester 8", sgpa: 0.0, completed: false }
-];
-
-const currentSemesterCourses = [
-  { id: 1, code: "CS4001", name: "Machine Learning", credits: 4, attendance: 92, internalMarks: 45, maxInternal: 50 },
-  { id: 2, code: "CS4002", name: "Cloud Computing", credits: 4, attendance: 88, internalMarks: 42, maxInternal: 50 },
-  { id: 3, code: "CS4003", name: "Natural Language Processing", credits: 3, attendance: 85, internalMarks: 38, maxInternal: 50 },
-  { id: 4, code: "CS4004", name: "Big Data Analytics", credits: 4, attendance: 90, internalMarks: 43, maxInternal: 50 },
-  { id: 5, code: "CS4005", name: "Internet of Things", credits: 3, attendance: 94, internalMarks: 47, maxInternal: 50 },
-  { id: 6, code: "CS4006", name: "Capstone Project", credits: 6, attendance: 100, internalMarks: 48, maxInternal: 50 }
-];
-
-const pastCourses = [
-  { id: 1, code: "CS3001", name: "Data Structures", credits: 4, grade: "A+", semester: "Sem 3" },
-  { id: 2, code: "CS3002", name: "Operating Systems", credits: 4, grade: "A", semester: "Sem 3" },
-  { id: 3, code: "CS3003", name: "Database Management Systems", credits: 4, grade: "A+", semester: "Sem 3" },
-  { id: 4, code: "CS3004", name: "Computer Networks", credits: 3, grade: "A", semester: "Sem 3" },
-  { id: 5, code: "CS3005", name: "Theory of Computation", credits: 3, grade: "B+", semester: "Sem 3" },
-  { id: 6, code: "CS3006", name: "Design & Analysis of Algorithms", credits: 4, grade: "A", semester: "Sem 4" },
-  { id: 7, code: "CS3007", name: "Web Technologies", credits: 3, grade: "A+", semester: "Sem 4" },
-  { id: 8, code: "CS3008", name: "Computer Architecture", credits: 4, grade: "A", semester: "Sem 4" }
-];
-
-const gradePointMapping: Record<string, number> = {
-  "A+": 10,
-  "A": 9,
-  "B+": 8,
-  "B": 7,
-  "C+": 6,
-  "C": 5,
-  "D": 4,
-  "F": 0
-};
-
-const getColorForAttendance = (attendance: number) => {
-  if (attendance >= 90) return "text-green-600";
-  if (attendance >= 80) return "text-amber-600";
-  return "text-red-600";
-};
-
-const getColorForGrade = (grade: string) => {
-  if (grade === "A+" || grade === "A") return "text-green-600";
-  if (grade === "B+" || grade === "B") return "text-blue-600";
-  if (grade === "C+" || grade === "C") return "text-amber-600";
-  return "text-red-600";
-};
+import { Download, GraduationCap, LineChart, BarChart3, Activity, BookOpen, Pencil } from "lucide-react";
+import EditAcademicModal from '@/components/academics/EditAcademicModal';
 
 const Academics = () => {
+  const [studentInfo, setStudentInfo] = useState({
+    name: "Rahul Sharma",
+    regNo: "RA1811003010092",
+    branch: "Computer Science & Engineering",
+    batch: "2020-2024",
+    currentSemester: 7,
+    cgpa: 8.92,
+    credits: {
+      completed: 156,
+      total: 180
+    }
+  });
+
+  const [semesters, setSemesters] = useState([
+    { id: 1, name: "Semester 1", sgpa: 8.3, completed: true },
+    { id: 2, name: "Semester 2", sgpa: 8.6, completed: true },
+    { id: 3, name: "Semester 3", sgpa: 9.1, completed: true },
+    { id: 4, name: "Semester 4", sgpa: 9.0, completed: true },
+    { id: 5, name: "Semester 5", sgpa: 8.7, completed: true },
+    { id: 6, name: "Semester 6", sgpa: 9.2, completed: true },
+    { id: 7, name: "Semester 7", sgpa: 0.0, completed: false },
+    { id: 8, name: "Semester 8", sgpa: 0.0, completed: false }
+  ]);
+
+  const [currentSemesterCourses, setCurrentSemesterCourses] = useState([
+    { id: 1, code: "CS4001", name: "Machine Learning", credits: 4, attendance: 92, internalMarks: 45, maxInternal: 50 },
+    { id: 2, code: "CS4002", name: "Cloud Computing", credits: 4, attendance: 88, internalMarks: 42, maxInternal: 50 },
+    { id: 3, code: "CS4003", name: "Natural Language Processing", credits: 3, attendance: 85, internalMarks: 38, maxInternal: 50 },
+    { id: 4, code: "CS4004", name: "Big Data Analytics", credits: 4, attendance: 90, internalMarks: 43, maxInternal: 50 },
+    { id: 5, code: "CS4005", name: "Internet of Things", credits: 3, attendance: 94, internalMarks: 47, maxInternal: 50 },
+    { id: 6, code: "CS4006", name: "Capstone Project", credits: 6, attendance: 100, internalMarks: 48, maxInternal: 50 }
+  ]);
+
+  const [pastCourses] = useState([
+    { id: 1, code: "CS3001", name: "Data Structures", credits: 4, grade: "A+", semester: "Sem 3" },
+    { id: 2, code: "CS3002", name: "Operating Systems", credits: 4, grade: "A", semester: "Sem 3" },
+    { id: 3, code: "CS3003", name: "Database Management Systems", credits: 4, grade: "A+", semester: "Sem 3" },
+    { id: 4, code: "CS3004", name: "Computer Networks", credits: 3, grade: "A", semester: "Sem 3" },
+    { id: 5, code: "CS3005", name: "Theory of Computation", credits: 3, grade: "B+", semester: "Sem 3" },
+    { id: 6, code: "CS3006", name: "Design & Analysis of Algorithms", credits: 4, grade: "A", semester: "Sem 4" },
+    { id: 7, code: "CS3007", name: "Web Technologies", credits: 3, grade: "A+", semester: "Sem 4" },
+    { id: 8, code: "CS3008", name: "Computer Architecture", credits: 4, grade: "A", semester: "Sem 4" }
+  ]);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editType, setEditType] = useState<'cgpa' | 'course'>('cgpa');
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+
+  const gradePointMapping: Record<string, number> = {
+    "A+": 10,
+    "A": 9,
+    "B+": 8,
+    "B": 7,
+    "C+": 6,
+    "C": 5,
+    "D": 4,
+    "F": 0
+  };
+
+  const getColorForAttendance = (attendance: number) => {
+    if (attendance >= 90) return "text-green-600";
+    if (attendance >= 80) return "text-amber-600";
+    return "text-red-600";
+  };
+
+  const getColorForGrade = (grade: string) => {
+    if (grade === "A+" || grade === "A") return "text-green-600";
+    if (grade === "B+" || grade === "B") return "text-blue-600";
+    if (grade === "C+" || grade === "C") return "text-amber-600";
+    return "text-red-600";
+  };
+
+  const handleEditCgpa = () => {
+    setEditType('cgpa');
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditCourse = (course: any) => {
+    setEditType('course');
+    setEditingCourse(course);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveChanges = (data: any) => {
+    if (editType === 'cgpa') {
+      setStudentInfo({ ...studentInfo, cgpa: data.cgpa });
+    } else if (editType === 'course' && data.course) {
+      const updatedCourses = currentSemesterCourses.map(c => 
+        c.id === data.course.id ? { ...c, ...data.course } : c
+      );
+      setCurrentSemesterCourses(updatedCourses);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -94,9 +121,19 @@ const Academics = () => {
       <div className="grid md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <GraduationCap className="h-5 w-5 mr-2" />
-              CGPA Overview
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <GraduationCap className="h-5 w-5 mr-2" />
+                CGPA Overview
+              </div>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={handleEditCgpa}
+                title="Edit CGPA"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -202,6 +239,7 @@ const Academics = () => {
                     <TableHead className="text-center">Credits</TableHead>
                     <TableHead className="text-center">Attendance</TableHead>
                     <TableHead className="text-center">Internal Marks</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -217,6 +255,16 @@ const Academics = () => {
                       </TableCell>
                       <TableCell className="text-center">
                         {course.internalMarks}/{course.maxInternal}
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleEditCourse(course)}
+                          title="Edit course details"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -362,6 +410,18 @@ const Academics = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <EditAcademicModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSaveChanges}
+        initialData={
+          editType === 'cgpa' 
+            ? { cgpa: studentInfo.cgpa } 
+            : { cgpa: 0, courses: [editingCourse] }
+        }
+        type={editType}
+      />
     </div>
   );
 };
