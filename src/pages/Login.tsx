@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Github } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/AuthContext';
 
 interface LoginProps {
   onSuccessfulLogin: () => void;
@@ -22,25 +24,43 @@ interface LoginProps {
 
 export default function Login({ onSuccessfulLogin }: LoginProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loginData, setLoginData] = useState({
     email: '',
     password: ''
   });
+  const [signupData, setSignupData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Redirect if user is already logged in
+  React.useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setLoginData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignupData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+        email: loginData.email,
+        password: loginData.password,
       });
       
       if (error) {
@@ -52,6 +72,41 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign in');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    if (signupData.password !== signupData.confirmPassword) {
+      toast.error('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.user?.identities?.length === 0) {
+        toast.error('Email already in use. Please try logging in instead.');
+      } else {
+        toast.success('Sign up successful! Please check your email for verification.');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign up');
     } finally {
       setIsLoading(false);
     }
@@ -92,94 +147,176 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
         
         <Card>
           <CardHeader>
-            <CardTitle>Sign in to your account</CardTitle>
+            <CardTitle>Welcome to DeepSeek</CardTitle>
             <CardDescription>
-              Enter your credentials to access your personalized learning dashboard
+              Sign in or create an account to access your personalized learning dashboard
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">College Email</Label>
-                <Input 
-                  id="email" 
-                  name="email"
-                  type="email" 
-                  placeholder="your.name@college.edu" 
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <a 
-                    href="#" 
-                    className="text-sm text-primary hover:underline"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toast.info('Password reset functionality coming soon');
-                    }}
+          
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={handleLogin}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">College Email</Label>
+                    <Input 
+                      id="email" 
+                      name="email"
+                      type="email" 
+                      placeholder="your.name@college.edu" 
+                      value={loginData.email}
+                      onChange={handleLoginChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <Button 
+                        type="button"
+                        variant="link" 
+                        className="p-0 h-auto font-normal"
+                        onClick={async () => {
+                          if (!loginData.email) {
+                            toast.error('Please enter your email address first.');
+                            return;
+                          }
+                          
+                          try {
+                            const { error } = await supabase.auth.resetPasswordForEmail(
+                              loginData.email,
+                              { redirectTo: `${window.location.origin}/reset-password` }
+                            );
+                            
+                            if (error) throw error;
+                            toast.success('Password reset email sent! Please check your inbox.');
+                          } catch (error: any) {
+                            toast.error(error.message || 'Failed to send reset email.');
+                          }
+                        }}
+                      >
+                        Forgot password?
+                      </Button>
+                    </div>
+                    <Input 
+                      id="password" 
+                      name="password"
+                      type="password" 
+                      value={loginData.password}
+                      onChange={handleLoginChange}
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
                   >
-                    Forgot password?
-                  </a>
-                </div>
-                <Input 
-                  id="password" 
-                  name="password"
-                  type="password" 
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-3">
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? 'Signing in...' : 'Sign in'}
-              </Button>
-              
-              <div className="relative w-full my-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-card text-muted-foreground">or continue with</span>
-                </div>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                className="w-full"
-                type="button"
-                onClick={handleGithubLogin}
-                disabled={isLoading}
-              >
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              
-              <p className="text-center text-sm text-muted-foreground mt-4">
-                Don't have an account?{" "}
-                <a 
-                  href="#" 
-                  className="text-primary hover:underline" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/signup');
-                    toast.info('Sign up page coming soon');
-                  }}
-                >
-                  Create one
-                </a>
-              </p>
-            </CardFooter>
-          </form>
+                    {isLoading ? 'Signing in...' : 'Sign in'}
+                  </Button>
+                  
+                  <div className="relative w-full my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-card text-muted-foreground">or continue with</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    type="button"
+                    onClick={handleGithubLogin}
+                    disabled={isLoading}
+                  >
+                    <Github className="mr-2 h-4 w-4" />
+                    GitHub
+                  </Button>
+                </CardFooter>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">College Email</Label>
+                    <Input 
+                      id="signup-email" 
+                      name="email"
+                      type="email" 
+                      placeholder="your.name@college.edu" 
+                      value={signupData.email}
+                      onChange={handleSignupChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input 
+                      id="signup-password" 
+                      name="password"
+                      type="password" 
+                      value={signupData.password}
+                      onChange={handleSignupChange}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input 
+                      id="confirm-password" 
+                      name="confirmPassword"
+                      type="password" 
+                      value={signupData.confirmPassword}
+                      onChange={handleSignupChange}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                  </Button>
+                  
+                  <div className="relative w-full my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-card text-muted-foreground">or continue with</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    type="button"
+                    onClick={handleGithubLogin}
+                    disabled={isLoading}
+                  >
+                    <Github className="mr-2 h-4 w-4" />
+                    GitHub
+                  </Button>
+                </CardFooter>
+              </form>
+            </TabsContent>
+          </Tabs>
         </Card>
       </div>
     </div>
