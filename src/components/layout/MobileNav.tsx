@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { 
@@ -25,24 +25,24 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', path: '/', icon: Home, externalUrl: null },
-  { name: 'Learning', path: '/learning', icon: BookOpen, externalUrl: null },
-  { name: 'Coding Platform', path: '/coding', icon: Code, externalUrl: null },
-  { name: 'GitHub & Projects', path: '/github', icon: FileText, externalUrl: null },
-  { name: 'Achievements', path: '/achievements', icon: Award, externalUrl: null },
-  { name: 'Academic Records', path: '/academics', icon: GraduationCap, externalUrl: null },
-  { name: 'Resume Builder', path: '/resume', icon: FileText, externalUrl: null },
-  { name: 'SWOT Analysis', path: '/swot', icon: Activity, externalUrl: null },
-  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar, externalUrl: null },
-  { name: 'Certifications', path: '/certifications', icon: Award, externalUrl: null },
-  { name: 'Internships', path: '/internships', icon: Briefcase, externalUrl: null },
-  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare, externalUrl: null },
-  { name: 'Learning Resources', path: '/resources', icon: Youtube, externalUrl: null },
-  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare, externalUrl: null },
-  { name: 'Opportunities', path: '/opportunities', icon: BarChart2, externalUrl: null },
-  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock, externalUrl: null },
-  { name: 'To-Do List', path: '/todo', icon: ListTodo, externalUrl: null },
-  { name: 'Settings', path: '/settings', icon: Settings, externalUrl: null }
+  { name: 'Dashboard', path: '/', icon: Home },
+  { name: 'Learning', path: '/learning', icon: BookOpen },
+  { name: 'Coding Platform', path: '/coding', icon: Code },
+  { name: 'GitHub & Projects', path: '/github', icon: FileText },
+  { name: 'Achievements', path: '/achievements', icon: Award },
+  { name: 'Academic Records', path: '/academics', icon: GraduationCap },
+  { name: 'Resume Builder', path: '/resume', icon: FileText },
+  { name: 'SWOT Analysis', path: '/swot', icon: Activity },
+  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar },
+  { name: 'Certifications', path: '/certifications', icon: Award },
+  { name: 'Internships', path: '/internships', icon: Briefcase },
+  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare },
+  { name: 'Learning Resources', path: '/resources', icon: Youtube },
+  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare },
+  { name: 'Opportunities', path: '/opportunities', icon: BarChart2 },
+  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock },
+  { name: 'To-Do List', path: '/todo', icon: ListTodo },
+  { name: 'Settings', path: '/settings', icon: Settings }
 ];
 
 export const MobileNav = () => {
@@ -84,9 +84,6 @@ export const MobileNav = () => {
               >
                 <item.icon className="h-5 w-5 mr-3" />
                 <span className="flex-1">{item.name}</span>
-                {item.externalUrl && (
-                  <ExternalLink className="h-4 w-4 opacity-70" />
-                )}
               </Link>
             ))}
           </div>
