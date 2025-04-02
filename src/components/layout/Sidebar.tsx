@@ -56,7 +56,7 @@ export const Sidebar = ({ collapsed = false }: SidebarProps) => {
         "hidden md:block"
       )}
     >
-      <div className="h-full px-3 py-4 flex flex-col">
+      <div className="h-full px-3 py-4 flex flex-col overflow-hidden">
         <div className={cn(
           "flex items-center mb-6 pl-2", 
           collapsed ? "justify-center" : ""
@@ -77,8 +77,9 @@ export const Sidebar = ({ collapsed = false }: SidebarProps) => {
                   ? "bg-primary text-white"
                   : "text-gray-700 hover:bg-gray-100"
               )}
+              title={collapsed ? item.name : ""}
             >
-              <item.icon className="h-5 w-5 mr-3" />
+              <item.icon className={cn("h-5 w-5", collapsed ? "mr-0" : "mr-3")} />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           ))}

@@ -23,7 +23,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar collapsed={sidebarCollapsed} />
       
-      <div className="flex flex-col flex-1 overflow-x-hidden">
+      <div className={`flex flex-col flex-1 overflow-x-hidden transition-all duration-300 ${sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
         <TopBar />
         <div className="relative">
           <div 
