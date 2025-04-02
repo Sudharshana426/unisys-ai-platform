@@ -14,6 +14,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Github } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface LoginProps {
   onSuccessfulLogin: () => void;
@@ -32,22 +33,50 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
       
-      if (formData.email && formData.password) {
-        toast.success('Login successful!');
-        onSuccessfulLogin();
-        navigate('/');
-      } else {
-        toast.error('Please enter both email and password');
+      if (error) {
+        throw error;
       }
-    }, 1500);
+      
+      toast.success('Login successful!');
+      onSuccessfulLogin();
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign in');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Auth redirect will happen automatically
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign in with GitHub');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -88,7 +117,10 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
                   <a 
                     href="#" 
                     className="text-sm text-primary hover:underline"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toast.info('Password reset functionality coming soon');
+                    }}
                   >
                     Forgot password?
                   </a>
@@ -125,11 +157,8 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
                 variant="outline" 
                 className="w-full"
                 type="button"
-                onClick={() => {
-                  toast.success('GitHub login successful!');
-                  onSuccessfulLogin();
-                  navigate('/');
-                }}
+                onClick={handleGithubLogin}
+                disabled={isLoading}
               >
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
@@ -137,7 +166,15 @@ export default function Login({ onSuccessfulLogin }: LoginProps) {
               
               <p className="text-center text-sm text-muted-foreground mt-4">
                 Don't have an account?{" "}
-                <a href="#" className="text-primary hover:underline" onClick={(e) => e.preventDefault()}>
+                <a 
+                  href="#" 
+                  className="text-primary hover:underline" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/signup');
+                    toast.info('Sign up page coming soon');
+                  }}
+                >
                   Create one
                 </a>
               </p>

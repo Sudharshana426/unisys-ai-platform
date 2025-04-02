@@ -3,8 +3,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Menu } from 'lucide-react';
+import { ExternalLink, Menu, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 import { 
   Home, 
   BookOpen, 
@@ -25,34 +27,32 @@ import {
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: Home, externalUrl: null },
-  { name: 'Learning', path: '/learning', icon: BookOpen, externalUrl: 'https://www.coursera.org' },
-  { name: 'Coding Platform', path: '/coding', icon: Code, externalUrl: 'https://leetcode.com' },
-  { name: 'GitHub & Projects', path: '/github', icon: FileText, externalUrl: 'https://github.com' },
-  { name: 'Achievements', path: '/achievements', icon: Award, externalUrl: 'https://stackoverflow.com/help/badges' },
-  { name: 'Academic Records', path: '/academics', icon: GraduationCap, externalUrl: 'https://www.canvas.net' },
-  { name: 'Resume Builder', path: '/resume', icon: FileText, externalUrl: 'https://www.resume.com' },
-  { name: 'SWOT Analysis', path: '/swot', icon: Activity, externalUrl: 'https://www.mindtools.com/pages/article/newTMC_05.htm' },
-  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar, externalUrl: 'https://calendar.google.com' },
-  { name: 'Certifications', path: '/certifications', icon: Award, externalUrl: 'https://www.coursera.org/professional-certificates' },
-  { name: 'Internships', path: '/internships', icon: Briefcase, externalUrl: 'https://www.linkedin.com/jobs' },
-  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare, externalUrl: 'https://chat.openai.com' },
-  { name: 'Learning Resources', path: '/resources', icon: Youtube, externalUrl: 'https://www.youtube.com/learning' },
-  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare, externalUrl: 'https://www.pramp.com' },
-  { name: 'Opportunities', path: '/opportunities', icon: BarChart2, externalUrl: 'https://www.indeed.com' },
-  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock, externalUrl: 'https://pomofocus.io' },
-  { name: 'To-Do List', path: '/todo', icon: ListTodo, externalUrl: 'https://todoist.com' },
+  { name: 'Learning', path: '/learning', icon: BookOpen, externalUrl: null },
+  { name: 'Coding Platform', path: '/coding', icon: Code, externalUrl: null },
+  { name: 'GitHub & Projects', path: '/github', icon: FileText, externalUrl: null },
+  { name: 'Achievements', path: '/achievements', icon: Award, externalUrl: null },
+  { name: 'Academic Records', path: '/academics', icon: GraduationCap, externalUrl: null },
+  { name: 'Resume Builder', path: '/resume', icon: FileText, externalUrl: null },
+  { name: 'SWOT Analysis', path: '/swot', icon: Activity, externalUrl: null },
+  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar, externalUrl: null },
+  { name: 'Certifications', path: '/certifications', icon: Award, externalUrl: null },
+  { name: 'Internships', path: '/internships', icon: Briefcase, externalUrl: null },
+  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare, externalUrl: null },
+  { name: 'Learning Resources', path: '/resources', icon: Youtube, externalUrl: null },
+  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare, externalUrl: null },
+  { name: 'Opportunities', path: '/opportunities', icon: BarChart2, externalUrl: null },
+  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock, externalUrl: null },
+  { name: 'To-Do List', path: '/todo', icon: ListTodo, externalUrl: null },
   { name: 'Settings', path: '/settings', icon: Settings, externalUrl: null }
 ];
 
 export const MobileNav = () => {
   const location = useLocation();
+  const { signOut } = useAuth();
 
-  const handleNavigation = (item: typeof navItems[0], event: React.MouseEvent) => {
-    // If there's an external URL and it's not a direct app route
-    if (item.externalUrl) {
-      event.preventDefault();
-      window.open(item.externalUrl, '_blank');
-    }
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Successfully signed out');
   };
 
   return (
@@ -81,7 +81,6 @@ export const MobileNav = () => {
                     ? "bg-primary text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 )}
-                onClick={(e) => handleNavigation(item, e)}
               >
                 <item.icon className="h-5 w-5 mr-3" />
                 <span className="flex-1">{item.name}</span>
@@ -93,6 +92,15 @@ export const MobileNav = () => {
           </div>
           
           <div className="pt-2">
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center justify-start" 
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              <span>Sign Out</span>
+            </Button>
+            
             <div className="px-4 py-3 mt-4 rounded-lg bg-gradient-to-r from-brand-blue/10 to-brand-purple/10">
               <p className="text-sm font-medium">Need help?</p>
               <p className="text-xs text-gray-500 mt-1">Ask your AI assistant or contact support</p>
