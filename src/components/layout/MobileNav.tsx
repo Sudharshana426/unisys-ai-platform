@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { ExternalLink, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   Home, 
@@ -24,28 +24,36 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', path: '/', icon: Home },
-  { name: 'Learning', path: '/learning', icon: BookOpen },
-  { name: 'Coding Platform', path: '/coding', icon: Code },
-  { name: 'GitHub & Projects', path: '/github', icon: FileText },
-  { name: 'Achievements', path: '/achievements', icon: Award },
-  { name: 'Academic Records', path: '/academics', icon: GraduationCap },
-  { name: 'Resume Builder', path: '/resume', icon: FileText },
-  { name: 'SWOT Analysis', path: '/swot', icon: Activity },
-  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar },
-  { name: 'Certifications', path: '/certifications', icon: Award },
-  { name: 'Internships', path: '/internships', icon: Briefcase },
-  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare },
-  { name: 'Learning Resources', path: '/resources', icon: Youtube },
-  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare },
-  { name: 'Opportunities', path: '/opportunities', icon: BarChart2 },
-  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock },
-  { name: 'To-Do List', path: '/todo', icon: ListTodo },
-  { name: 'Settings', path: '/settings', icon: Settings }
+  { name: 'Dashboard', path: '/', icon: Home, externalUrl: null },
+  { name: 'Learning', path: '/learning', icon: BookOpen, externalUrl: 'https://www.coursera.org' },
+  { name: 'Coding Platform', path: '/coding', icon: Code, externalUrl: 'https://leetcode.com' },
+  { name: 'GitHub & Projects', path: '/github', icon: FileText, externalUrl: 'https://github.com' },
+  { name: 'Achievements', path: '/achievements', icon: Award, externalUrl: 'https://stackoverflow.com/help/badges' },
+  { name: 'Academic Records', path: '/academics', icon: GraduationCap, externalUrl: 'https://www.canvas.net' },
+  { name: 'Resume Builder', path: '/resume', icon: FileText, externalUrl: 'https://www.resume.com' },
+  { name: 'SWOT Analysis', path: '/swot', icon: Activity, externalUrl: 'https://www.mindtools.com/pages/article/newTMC_05.htm' },
+  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar, externalUrl: 'https://calendar.google.com' },
+  { name: 'Certifications', path: '/certifications', icon: Award, externalUrl: 'https://www.coursera.org/professional-certificates' },
+  { name: 'Internships', path: '/internships', icon: Briefcase, externalUrl: 'https://www.linkedin.com/jobs' },
+  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare, externalUrl: 'https://chat.openai.com' },
+  { name: 'Learning Resources', path: '/resources', icon: Youtube, externalUrl: 'https://www.youtube.com/learning' },
+  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare, externalUrl: 'https://www.pramp.com' },
+  { name: 'Opportunities', path: '/opportunities', icon: BarChart2, externalUrl: 'https://www.indeed.com' },
+  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock, externalUrl: 'https://pomofocus.io' },
+  { name: 'To-Do List', path: '/todo', icon: ListTodo, externalUrl: 'https://todoist.com' },
+  { name: 'Settings', path: '/settings', icon: Settings, externalUrl: null }
 ];
 
 export const MobileNav = () => {
   const location = useLocation();
+
+  const handleNavigation = (item: typeof navItems[0], event: React.MouseEvent) => {
+    // If there's an external URL and it's not a direct app route
+    if (item.externalUrl) {
+      event.preventDefault();
+      window.open(item.externalUrl, '_blank');
+    }
+  };
 
   return (
     <Sheet>
@@ -73,9 +81,13 @@ export const MobileNav = () => {
                     ? "bg-primary text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 )}
+                onClick={(e) => handleNavigation(item, e)}
               >
                 <item.icon className="h-5 w-5 mr-3" />
-                <span>{item.name}</span>
+                <span className="flex-1">{item.name}</span>
+                {item.externalUrl && (
+                  <ExternalLink className="h-4 w-4 opacity-70" />
+                )}
               </Link>
             ))}
           </div>
