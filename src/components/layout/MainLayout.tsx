@@ -47,7 +47,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+          <main className="flex-1 p-4 md:p-6 pb-16 overflow-y-auto">
             {children}
           </main>
         </div>

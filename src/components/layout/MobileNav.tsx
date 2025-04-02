@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Menu, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { 
   Home, 
@@ -48,11 +47,12 @@ const navItems = [
 
 export const MobileNav = () => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    localStorage.removeItem("isLoggedIn");
     toast.success('Successfully signed out');
+    navigate('/login');
   };
 
   return (

@@ -12,10 +12,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const TopBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    toast.success("Successfully logged out");
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -116,7 +125,7 @@ export const TopBar = () => {
                 <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

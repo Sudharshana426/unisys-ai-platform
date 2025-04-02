@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { useState, useEffect } from "react";
-import { supabase } from "./lib/supabase";
 
 // Pages
 import Login from "./pages/Login";
@@ -36,35 +35,26 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in with Supabase
+  // Simple check if user is logged in from localStorage
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setIsLoggedIn(!!data.session);
-      } catch (error) {
-        console.error("Error checking auth status:", error);
-      } finally {
-        setLoading(false);
-      }
+    const checkAuth = () => {
+      const savedLoginState = localStorage.getItem("isLoggedIn");
+      setIsLoggedIn(savedLoginState === "true");
+      setLoading(false);
     };
     
     checkAuth();
-    
-    // Listen for auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
   }, []);
 
-  // For demo purposes, we'll also set user as logged in when they use the login page
+  // Simple login/logout functions
   const handleSuccessfulLogin = () => {
     localStorage.setItem("isLoggedIn", "true");
     setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
   };
 
   if (loading) {
