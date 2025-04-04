@@ -1,423 +1,462 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, Calendar, Code, ExternalLink, FileText, Plus, Search, Trophy } from "lucide-react";
-import AddAchievementModal from '@/components/achievements/AddAchievementModal';
-import ViewCertificateModal from '@/components/certifications/ViewCertificateModal';
-
-const initialHackathons = [
-  {
-    id: 1,
-    name: "SIH Hackathon 2023",
-    date: "March 15-17, 2023",
-    position: "Winner",
-    category: "Smart Education",
-    project: "AI-Powered Learning Assistant",
-    teamSize: 5,
-    image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    name: "Google Solutions Challenge",
-    date: "January 24-26, 2023",
-    position: "2nd Place",
-    category: "Sustainability",
-    project: "EcoTrack - Campus Sustainability Monitor",
-    teamSize: 4,
-    image: "https://images.unsplash.com/photo-1526378800651-c32d170fe6f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 3,
-    name: "Microsoft Imagine Cup 2023",
-    date: "December 10-12, 2022",
-    position: "Finalist",
-    category: "Earth",
-    project: "WaterSense - Smart Water Management",
-    teamSize: 3,
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  }
-];
-
-const initialCompetitions = [
-  {
-    id: 1,
-    name: "ACM ICPC Regionals",
-    date: "November 18, 2023",
-    position: "6th Rank",
-    category: "Competitive Programming",
-    team: "Code Crusaders",
-    certificate: true,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    name: "Google Kickstart Round D",
-    date: "July 23, 2023",
-    position: "Top 15%",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: true,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 3,
-    name: "Codeforces Global Round 25",
-    date: "June 8, 2023",
-    position: "Division 1 (2146 Rating)",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: false,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 4,
-    name: "LeetCode Weekly Contest 312",
-    date: "May 14, 2023",
-    position: "Top 5% (3/4 problems)",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: false,
-    fileURL: "",
-    fileName: ""
-  }
-];
-
-const initialPapers = [
-  {
-    id: 1,
-    title: "Machine Learning Approaches for Educational Data Mining",
-    authors: "Sharma R., Patel V., Gupta S.",
-    publication: "IEEE International Conference on Educational Technology",
-    date: "June 2023",
-    doi: "10.1109/ICET.2023.123456",
-    abstract: "This paper explores various machine learning techniques for analyzing educational data to improve student outcomes and personalize learning experiences.",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    title: "Blockchain-Based Certificate Verification System for Academic Credentials",
-    authors: "Sharma R., Kumar A.",
-    publication: "Journal of Educational Technology & Society",
-    date: "March 2023",
-    doi: "10.2307/JETS.2023.789012",
-    abstract: "We propose a secure and tamper-proof blockchain framework for issuing and verifying academic credentials to prevent certificate fraud.",
-    fileURL: "",
-    fileName: ""
-  }
-];
+import { 
+  Award, 
+  Calendar, 
+  Download, 
+  Eye, 
+  FileText, 
+  PlusCircle, 
+  Trophy, 
+  UserCheck 
+} from "lucide-react";
+import AddAchievementModal from "@/components/achievements/AddAchievementModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const Achievements = () => {
-  const [hackathons, setHackathons] = useState(initialHackathons);
-  const [competitions, setCompetitions] = useState(initialCompetitions);
-  const [papers, setPapers] = useState(initialPapers);
+  const [isAddHackathonOpen, setIsAddHackathonOpen] = useState(false);
+  const [isAddCompetitionOpen, setIsAddCompetitionOpen] = useState(false);
+  const [isAddPaperOpen, setIsAddPaperOpen] = useState(false);
+  const [viewCertificate, setViewCertificate] = useState<any | null>(null);
   
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'hackathon' | 'competition' | 'paper'>('hackathon');
-  
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<any>(null);
-  
-  const handleAddAchievement = (achievement: any) => {
-    if (modalType === 'hackathon') {
-      setHackathons([...hackathons, achievement]);
-    } else if (modalType === 'competition') {
-      setCompetitions([...competitions, achievement]);
-    } else if (modalType === 'paper') {
-      setPapers([...papers, achievement]);
+  // Sample data - in a real app, this would come from your backend
+  const [hackathons, setHackathons] = useState([
+    {
+      id: 1,
+      name: "HackTech 2023",
+      date: "March 15-17, 2023",
+      position: "Winner",
+      category: "Smart Education",
+      project: "AI-Powered Learning Assistant",
+      teamSize: 4,
+      image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      fileURL: "",
+      fileName: ""
+    },
+    {
+      id: 2,
+      name: "Code For Change",
+      date: "January 5-7, 2023",
+      position: "2nd Place",
+      category: "Healthcare",
+      project: "MediTrack: Patient Monitoring System",
+      teamSize: 3,
+      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      fileURL: "",
+      fileName: ""
     }
+  ]);
+  
+  const [competitions, setCompetitions] = useState([
+    {
+      id: 1,
+      name: "LeetCode Weekly Contest 352",
+      date: "September 10, 2023",
+      position: "6th Rank",
+      category: "Competitive Programming",
+      team: "Individual",
+      certificate: true,
+      fileURL: "",
+      fileName: ""
+    },
+    {
+      id: 2,
+      name: "Google Kickstart Round C",
+      date: "May 21, 2023",
+      position: "Top 15%",
+      category: "Competitive Programming",
+      team: "Individual",
+      certificate: false,
+      fileURL: "",
+      fileName: ""
+    },
+    {
+      id: 3,
+      name: "ACM-ICPC Regionals",
+      date: "November 25, 2022",
+      position: "3rd Place",
+      category: "Team Programming",
+      team: "Team",
+      certificate: true,
+      fileURL: "",
+      fileName: ""
+    }
+  ]);
+  
+  const [papers, setPapers] = useState([
+    {
+      id: 1,
+      title: "Machine Learning Approaches for Educational Content Recommendation",
+      authors: "Sharma R., Patel V., Gupta S.",
+      publication: "IEEE International Conference on Educational Technology",
+      date: "July 2023",
+      doi: "10.1109/ICET.2023.123456",
+      abstract: "This paper presents a novel approach to educational content recommendation using advanced machine learning techniques...",
+      fileURL: "",
+      fileName: ""
+    }
+  ]);
+  
+  const handleAddHackathon = (hackathon: any) => {
+    setHackathons([...hackathons, hackathon]);
+    toast.success("Hackathon added successfully!");
   };
   
-  const openAddModal = (type: 'hackathon' | 'competition' | 'paper') => {
-    setModalType(type);
-    setIsAddModalOpen(true);
+  const handleAddCompetition = (competition: any) => {
+    setCompetitions([...competitions, competition]);
+    toast.success("Competition added successfully!");
   };
   
-  const viewFile = (file: any) => {
-    setSelectedFile(file);
-    setIsViewModalOpen(true);
+  const handleAddPaper = (paper: any) => {
+    setPapers([...papers, paper]);
+    toast.success("Paper added successfully!");
   };
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold gradient-heading">Achievements</h1>
-          <p className="text-muted-foreground">Track your accomplishments, competitions, and publications</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Search className="mr-2 h-4 w-4" />
-            Find Opportunities
-          </Button>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Achievement
-          </Button>
+          <h1 className="text-2xl font-bold">Achievements</h1>
+          <p className="text-muted-foreground">Showcase your hackathons, competitions, and publications</p>
         </div>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Trophy className="h-5 w-5 mr-2 text-amber-500" />
-            Achievement Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{hackathons.length}</p>
-              <p className="text-sm text-muted-foreground">Hackathon Wins</p>
-            </div>
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{competitions.length}</p>
-              <p className="text-sm text-muted-foreground">Coding Competitions</p>
-            </div>
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{papers.length}</p>
-              <p className="text-sm text-muted-foreground">Research Papers</p>
-            </div>
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">
-                {competitions.filter(c => c.certificate).length}
-              </p>
-              <p className="text-sm text-muted-foreground">Certificates</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Tabs defaultValue="hackathons">
-        <TabsList className="mb-4">
+
+      <Tabs defaultValue="hackathons" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="hackathons">Hackathons</TabsTrigger>
           <TabsTrigger value="competitions">Competitions</TabsTrigger>
           <TabsTrigger value="papers">Research Papers</TabsTrigger>
         </TabsList>
         
+        {/* Hackathons Tab */}
         <TabsContent value="hackathons" className="space-y-4">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('hackathon')} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setIsAddHackathonOpen(true)}
+              className="flex items-center gap-1"
+            >
+              <PlusCircle className="h-4 w-4" />
               Add Hackathon
             </Button>
           </div>
           
-          {hackathons.map((hackathon) => (
-            <Card key={hackathon.id}>
-              <div className="md:flex">
-                <div className="md:w-1/4">
-                  <div className="h-48 md:h-full overflow-hidden">
+          {hackathons.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {hackathons.map((hackathon) => (
+                <Card key={hackathon.id}>
+                  <div className="aspect-video w-full overflow-hidden">
                     <img 
                       src={hackathon.image} 
                       alt={hackathon.name} 
-                      className="w-full h-full object-cover"
+                      className="object-cover w-full h-full"
                     />
                   </div>
-                </div>
-                <div className="md:w-3/4">
-                  <CardHeader>
+                  <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{hackathon.name}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <Calendar className="h-4 w-4 mr-1" /> {hackathon.date}
-                        </CardDescription>
-                      </div>
-                      <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500">
-                        {hackathon.position}
-                      </Badge>
+                      <CardTitle className="text-lg">{hackathon.name}</CardTitle>
+                      <Badge className="ml-2">{hackathon.position}</Badge>
                     </div>
+                    <CardDescription className="flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {hackathon.date}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <CardContent className="pb-2">
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
                       <div>
-                        <p className="text-sm text-muted-foreground">Category</p>
-                        <p className="font-medium">{hackathon.category}</p>
+                        <span className="text-muted-foreground">Category:</span>
                       </div>
+                      <div>{hackathon.category}</div>
+                      
                       <div>
-                        <p className="text-sm text-muted-foreground">Project</p>
-                        <p className="font-medium">{hackathon.project}</p>
+                        <span className="text-muted-foreground">Project:</span>
                       </div>
+                      <div>{hackathon.project}</div>
+                      
                       <div>
-                        <p className="text-sm text-muted-foreground">Team Size</p>
-                        <p className="font-medium">{hackathon.teamSize} members</p>
+                        <span className="text-muted-foreground">Team Size:</span>
                       </div>
+                      <div>{hackathon.teamSize} members</div>
                     </div>
                   </CardContent>
-                  <CardFooter className="border-t pt-4">
-                    <div className="flex gap-2 ml-auto">
+                  <CardFooter>
+                    {hackathon.fileURL && (
                       <Button 
                         variant="outline" 
-                        size="sm"
-                        onClick={() => viewFile({
-                          name: hackathon.name, 
-                          fileURL: hackathon.fileURL,
-                          fileName: hackathon.fileName
-                        })}
-                        disabled={!hackathon.fileURL}
+                        className="w-full"
+                        onClick={() => setViewCertificate(hackathon)}
                       >
-                        <FileText className="mr-2 h-4 w-4" />
+                        <Eye className="h-4 w-4 mr-2" />
                         View Certificate
                       </Button>
-                      <Button size="sm">
-                        <Code className="mr-2 h-4 w-4" />
-                        Project Details
-                      </Button>
-                    </div>
+                    )}
                   </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="rounded-full bg-primary/10 p-3 mb-4">
+                  <Trophy className="h-6 w-6 text-primary" />
                 </div>
-              </div>
+                <h3 className="text-lg font-medium mb-2">No Hackathons Yet</h3>
+                <p className="text-center text-muted-foreground mb-4">
+                  Add your hackathon participations and achievements to showcase your experience.
+                </p>
+                <Button onClick={() => setIsAddHackathonOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Your First Hackathon
+                </Button>
+              </CardContent>
             </Card>
-          ))}
+          )}
         </TabsContent>
         
-        <TabsContent value="competitions">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('competition')} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
+        {/* Competitions Tab */}
+        <TabsContent value="competitions" className="space-y-4">
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setIsAddCompetitionOpen(true)}
+              className="flex items-center gap-1"
+            >
+              <PlusCircle className="h-4 w-4" />
               Add Competition
             </Button>
           </div>
           
-          <div className="space-y-4">
-            {competitions.map((competition) => (
-              <Card key={competition.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{competition.name}</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        <Calendar className="h-4 w-4 mr-1" /> {competition.date}
-                      </CardDescription>
+          {competitions.length > 0 ? (
+            <div className="grid gap-4">
+              {competitions.map((competition) => (
+                <Card key={competition.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                      <div>
+                        <CardTitle className="text-lg">{competition.name}</CardTitle>
+                        <CardDescription className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {competition.date}
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge>{competition.position}</Badge>
+                        <Badge variant="outline">
+                          {competition.team === "Individual" ? (
+                            <span className="flex items-center">
+                              <UserCheck className="h-3 w-3 mr-1" />
+                              Individual
+                            </span>
+                          ) : (
+                            "Team"
+                          )}
+                        </Badge>
+                      </div>
                     </div>
-                    <Badge variant="outline">{competition.position}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Category</p>
-                      <p className="font-medium">{competition.category}</p>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Category:</span> {competition.category}
+                      </div>
+                      
+                      {competition.certificate && (
+                        <div className="flex justify-start md:justify-end">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setViewCertificate(competition)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Certificate
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Participation</p>
-                      <p className="font-medium">{competition.team}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Certificate</p>
-                      <p className="font-medium">{competition.certificate ? "Yes" : "No"}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                  {competition.certificate && (
-                    <Button 
-                      size="sm" 
-                      className="ml-auto"
-                      onClick={() => viewFile({
-                        name: competition.name,
-                        fileURL: competition.fileURL,
-                        fileName: competition.fileName
-                      })}
-                      disabled={!competition.fileURL}
-                    >
-                      <Award className="mr-2 h-4 w-4" />
-                      View Certificate
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="rounded-full bg-primary/10 p-3 mb-4">
+                  <Award className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No Competitions Yet</h3>
+                <p className="text-center text-muted-foreground mb-4">
+                  Add your competition participations to showcase your achievements.
+                </p>
+                <Button onClick={() => setIsAddCompetitionOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Your First Competition
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         
-        <TabsContent value="papers">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('paper')} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Paper
+        {/* Research Papers Tab */}
+        <TabsContent value="papers" className="space-y-4">
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setIsAddPaperOpen(true)}
+              className="flex items-center gap-1"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Add Research Paper
             </Button>
           </div>
           
-          <div className="space-y-4">
-            {papers.map((paper) => (
-              <Card key={paper.id}>
-                <CardHeader>
-                  <CardTitle>{paper.title}</CardTitle>
-                  <CardDescription>{paper.authors}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Publication</p>
-                      <p className="font-medium">{paper.publication}</p>
+          {papers.length > 0 ? (
+            <div className="grid gap-4">
+              {papers.map((paper) => (
+                <Card key={paper.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{paper.title}</CardTitle>
+                    <CardDescription>
+                      {paper.authors}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <p className="text-sm mb-3">{paper.abstract}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Publication:</span> {paper.publication}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Date:</span> {paper.date}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">DOI:</span> {paper.doi}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">{paper.date}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">DOI</p>
-                      <p className="font-medium">{paper.doi}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground">Abstract</p>
-                    <p className="text-sm mt-1">{paper.abstract}</p>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                  <div className="flex gap-2 ml-auto">
+                  </CardContent>
+                  <CardFooter>
                     <Button 
                       variant="outline" 
-                      size="sm"
-                      onClick={() => viewFile({
-                        name: paper.title,
-                        fileURL: paper.fileURL,
-                        fileName: paper.fileName
-                      })}
-                      disabled={!paper.fileURL}
+                      className="w-full"
+                      onClick={() => setViewCertificate(paper)}
                     >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download PDF
+                      <FileText className="h-4 w-4 mr-2" />
+                      View Paper
                     </Button>
-                    <Button size="sm">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      View Publication
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="rounded-full bg-primary/10 p-3 mb-4">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No Research Papers Yet</h3>
+                <p className="text-center text-muted-foreground mb-4">
+                  Add your research papers and publications to showcase your academic achievements.
+                </p>
+                <Button onClick={() => setIsAddPaperOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Your First Paper
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
       
+      {/* View Certificate Modal */}
+      <Dialog open={!!viewCertificate} onOpenChange={() => setViewCertificate(null)}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {viewCertificate?.name || viewCertificate?.title || "Document"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center justify-center py-4">
+            {viewCertificate?.fileURL ? (
+              viewCertificate.fileURL.endsWith('.pdf') ? (
+                <iframe 
+                  src={viewCertificate.fileURL} 
+                  className="w-full h-[500px]" 
+                  title={viewCertificate.name || viewCertificate.title}
+                />
+              ) : (
+                <img 
+                  src={viewCertificate.fileURL} 
+                  alt={viewCertificate.name || viewCertificate.title} 
+                  className="max-w-full max-h-[500px] object-contain"
+                />
+              )
+            ) : (
+              <div className="text-center p-10 border rounded-lg">
+                <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">
+                  No document has been uploaded yet
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            {viewCertificate?.fileURL && (
+              <Button 
+                onClick={() => {
+                  if (viewCertificate.fileURL) {
+                    const link = document.createElement('a');
+                    link.href = viewCertificate.fileURL;
+                    link.download = viewCertificate.fileName || 'document';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Modals */}
       <AddAchievementModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddAchievement}
-        type={modalType}
+        isOpen={isAddHackathonOpen}
+        onClose={() => setIsAddHackathonOpen(false)}
+        onAdd={handleAddHackathon}
+        type="hackathon"
       />
       
-      <ViewCertificateModal
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        certificate={selectedFile}
+      <AddAchievementModal
+        isOpen={isAddCompetitionOpen}
+        onClose={() => setIsAddCompetitionOpen(false)}
+        onAdd={handleAddCompetition}
+        type="competition"
+      />
+      
+      <AddAchievementModal
+        isOpen={isAddPaperOpen}
+        onClose={() => setIsAddPaperOpen(false)}
+        onAdd={handleAddPaper}
+        type="paper"
       />
     </div>
   );

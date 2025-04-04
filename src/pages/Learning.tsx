@@ -1,259 +1,397 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, CheckCircle, Clock, PlayCircle, Trophy } from "lucide-react";
-
-const courses = [
-  {
-    id: 1,
-    title: "Data Structures & Algorithms",
-    description: "Learn fundamental algorithms and data structures",
-    progress: 78,
-    platform: "NPTEL",
-    instructor: "Dr. Sarah Johnson",
-    duration: "8 weeks",
-    completed: 14,
-    total: 18,
-    image: "https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  },
-  {
-    id: 2,
-    title: "Machine Learning Fundamentals",
-    description: "Introduction to machine learning algorithms and applications",
-    progress: 45,
-    platform: "Coursera",
-    instructor: "Dr. Andrew Ng",
-    duration: "12 weeks",
-    completed: 5,
-    total: 12,
-    image: "https://images.unsplash.com/photo-1591696331111-ef9586a5b17a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  },
-  {
-    id: 3,
-    title: "Web Development with React",
-    description: "Build modern web applications using React",
-    progress: 92,
-    platform: "Udemy",
-    instructor: "Max Schwarzmüller",
-    duration: "10 weeks",
-    completed: 11,
-    total: 12,
-    image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  },
-  {
-    id: 4,
-    title: "Database Management Systems",
-    description: "Design and manage relational databases",
-    progress: 25,
-    platform: "EdX",
-    instructor: "Prof. Michael Brown",
-    duration: "6 weeks",
-    completed: 2,
-    total: 8,
-    image: "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  }
-];
-
-const recommendations = [
-  {
-    id: 1,
-    title: "Cloud Computing with AWS",
-    description: "Learn to build scalable applications on AWS",
-    platform: "Coursera",
-    instructor: "Prof. David Liu",
-    duration: "6 weeks",
-    image: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  },
-  {
-    id: 2,
-    title: "Advanced Python Programming",
-    description: "Dive deeper into Python with advanced concepts",
-    platform: "Udacity",
-    instructor: "Maria Rodriguez",
-    duration: "4 weeks",
-    image: "https://images.unsplash.com/photo-1526379879527-8559ecfcb970?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&h=300&q=80"
-  }
-];
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { PlusCircle, Clock, CalendarDays, Award, BookOpen, CheckCircle2, ExternalLink } from "lucide-react";
+import AddCourseModal from "@/components/learning/AddCourseModal";
+import CourseCard from "@/components/learning/CourseCard";
+import { toast } from "sonner";
 
 const Learning = () => {
+  const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
+  
+  // Sample data - in a real app, this would come from your backend
+  const [currentCourses, setCurrentCourses] = useState([
+    {
+      id: 1,
+      title: "Machine Learning Fundamentals",
+      description: "Learn the core concepts of machine learning and implement various algorithms.",
+      platform: "Coursera",
+      instructor: "Andrew Ng",
+      startDate: "2023-09-15",
+      endDate: "2023-12-15",
+      progress: 65,
+      thumbnail: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWFjaGluZSUyMGxlYXJuaW5nfGVufDB8fDB8fHww",
+      skills: ["Python", "TensorFlow", "Data Analysis"],
+      url: "https://coursera.org/ml-course"
+    },
+    {
+      id: 2,
+      title: "Data Structures and Algorithms",
+      description: "Master the essential algorithms and data structures for technical interviews.",
+      platform: "Udemy",
+      instructor: "Dr. Ryan Ahmed",
+      startDate: "2023-10-01",
+      endDate: "2024-01-30",
+      progress: 42,
+      thumbnail: "https://images.unsplash.com/photo-1542903660-eedba2cda473?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvZGluZ3xlbnwwfHwwfHx8MA%3D%3D",
+      skills: ["Algorithms", "Java", "Problem Solving"],
+      url: "https://udemy.com/dsa-course"
+    },
+    {
+      id: 3,
+      title: "Full Stack Web Development",
+      description: "Build complete web applications using modern JavaScript frameworks.",
+      platform: "NPTEL",
+      instructor: "Prof. Kiran M.",
+      startDate: "2023-08-10",
+      endDate: "2023-11-10",
+      progress: 78,
+      thumbnail: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHdlYiUyMGRldmVsb3BtZW50fGVufDB8fDB8fHww",
+      skills: ["React", "Node.js", "MongoDB", "Express"],
+      url: "https://nptel.ac.in/web-dev"
+    }
+  ]);
+
+  const [completedCourses, setCompletedCourses] = useState([
+    {
+      id: 4,
+      title: "Introduction to Python Programming",
+      description: "Learn the basics of Python programming language.",
+      platform: "edX",
+      instructor: "Eric Grimson",
+      completionDate: "2023-07-20",
+      certificateUrl: "#",
+      thumbnail: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHl0aG9ufGVufDB8fDB8fHww",
+      skills: ["Python", "Programming Basics", "Data Types"],
+      duration: "8 weeks"
+    },
+    {
+      id: 5,
+      title: "Mobile App Development with Flutter",
+      description: "Create cross-platform mobile applications using Flutter and Dart.",
+      platform: "Udacity",
+      instructor: "Angela Yu",
+      completionDate: "2023-06-15",
+      certificateUrl: "#",
+      thumbnail: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9iaWxlJTIwYXBwfGVufDB8fDB8fHww",
+      skills: ["Flutter", "Dart", "UI Design", "Firebase"],
+      duration: "12 weeks"
+    }
+  ]);
+
+  // Recommended courses would be provided by your friend's implementation
+  const recommendedCourses = [
+    {
+      id: 6,
+      title: "Deep Learning Specialization",
+      description: "Master deep learning techniques with neural networks.",
+      platform: "Coursera",
+      thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZGVlcCUyMGxlYXJuaW5nfGVufDB8fDB8fHww",
+      instructor: "Andrew Ng",
+      skills: ["Neural Networks", "TensorFlow", "Deep Learning"],
+      matchScore: 95
+    },
+    {
+      id: 7,
+      title: "AWS Certified Solutions Architect",
+      description: "Prepare for the AWS certification exam and learn cloud architecture.",
+      platform: "Pluralsight",
+      thumbnail: "https://plus.unsplash.com/premium_photo-1661919589683-f11880119fbf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2xvdWQlMjBjb21wdXRpbmd8ZW58MHx8MHx8fDA%3D",
+      instructor: "Ryan Kroonenburg",
+      skills: ["AWS", "Cloud Computing", "Network Architecture"],
+      matchScore: 88
+    }
+  ];
+
+  // Extract all skills from completed courses
+  const acquiredSkills = [...new Set(
+    completedCourses.flatMap(course => course.skills)
+  )];
+
+  const handleAddCourse = (newCourse: any) => {
+    setCurrentCourses([...currentCourses, {
+      id: currentCourses.length + completedCourses.length + 1,
+      ...newCourse,
+      progress: 0
+    }]);
+    toast.success("Course added successfully!");
+  };
+
+  const handleUpdateProgress = (courseId: number, newProgress: number) => {
+    setCurrentCourses(
+      currentCourses.map(course => 
+        course.id === courseId 
+          ? { ...course, progress: newProgress } 
+          : course
+      )
+    );
+    toast.success("Progress updated!");
+  };
+
+  const handleMarkAsCompleted = (courseId: number) => {
+    const courseToComplete = currentCourses.find(course => course.id === courseId);
+    
+    if (courseToComplete) {
+      // Remove from current courses
+      setCurrentCourses(currentCourses.filter(course => course.id !== courseId));
+      
+      // Add to completed courses
+      setCompletedCourses([...completedCourses, {
+        ...courseToComplete,
+        completionDate: new Date().toISOString().split('T')[0],
+        duration: calculateDuration(courseToComplete.startDate, courseToComplete.endDate)
+      }]);
+      
+      toast.success("Course marked as completed!");
+    }
+  };
+
+  const calculateDuration = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 7) {
+      return `${diffDays} days`;
+    } else if (diffDays <= 31) {
+      return `${Math.ceil(diffDays / 7)} weeks`;
+    } else {
+      return `${Math.ceil(diffDays / 30)} months`;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold gradient-heading">Learning Dashboard</h1>
-        <Button>
-          <PlayCircle className="mr-2 h-4 w-4" />
-          Resume Learning
-        </Button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Learning Dashboard</h1>
+          <p className="text-muted-foreground">Track and manage your learning journey</p>
+        </div>
+        
+        <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
+          <Button 
+            onClick={() => setIsAddCourseModalOpen(true)}
+            className="flex items-center gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Add New Course
+          </Button>
+        </div>
       </div>
-      
-      <Tabs defaultValue="current">
-        <TabsList className="mb-4">
+
+      {/* Learning statistics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Current Courses</div>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-2xl font-bold">{currentCourses.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {currentCourses.reduce((avg, course) => avg + course.progress, 0) / currentCourses.length || 0}% average progress
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Completed Courses</div>
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-2xl font-bold">{completedCourses.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Since you started learning
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Learning Time</div>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-2xl font-bold">120 hrs</div>
+            <p className="text-xs text-muted-foreground">
+              15 hrs last week
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Skills Acquired</div>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-2xl font-bold">{acquiredSkills.length}</div>
+            <p className="text-xs text-muted-foreground">
+              From completed courses
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main content tabs */}
+      <Tabs defaultValue="current" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="current">Current Courses</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="recommended">Recommended</TabsTrigger>
         </TabsList>
         
+        {/* Current Courses Tab */}
         <TabsContent value="current" className="space-y-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {courses.map((course) => (
-              <Card key={course.id} className="overflow-hidden">
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={course.image} 
-                    alt={course.title} 
-                    className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                  />
+          {currentCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentCourses.map(course => (
+                <CourseCard 
+                  key={course.id}
+                  course={course}
+                  type="current"
+                  onUpdateProgress={handleUpdateProgress}
+                  onMarkAsCompleted={handleMarkAsCompleted}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="rounded-full bg-primary/10 p-3 mb-4">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{course.title}</CardTitle>
-                      <CardDescription className="mt-1">{course.description}</CardDescription>
-                    </div>
-                    <Badge variant="outline">{course.platform}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{course.progress}%</span>
-                    </div>
-                    <Progress value={course.progress} className="h-2" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Instructor</p>
-                      <p className="font-medium">{course.instructor}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Duration</p>
-                      <p className="font-medium">{course.duration}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between border-t pt-4">
-                  <div className="text-sm text-muted-foreground">
-                    <CheckCircle className="inline mr-1 h-4 w-4 text-green-500" />
-                    {course.completed}/{course.total} units completed
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Continue
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                <h3 className="text-lg font-medium mb-2">No Current Courses</h3>
+                <p className="text-center text-muted-foreground mb-4">
+                  You don't have any courses in progress at the moment.
+                </p>
+                <Button onClick={() => setIsAddCourseModalOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Your First Course
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         
-        <TabsContent value="completed">
-          <div className="bg-muted rounded-lg p-8 text-center">
-            <Trophy className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium mb-2">No completed courses yet</h3>
-            <p className="text-muted-foreground mb-4">Keep learning to complete your current courses</p>
-            <Button variant="outline">Browse Courses</Button>
-          </div>
+        {/* Completed Courses Tab */}
+        <TabsContent value="completed" className="space-y-4">
+          {completedCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {completedCourses.map(course => (
+                <CourseCard 
+                  key={course.id}
+                  course={course}
+                  type="completed"
+                />
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="rounded-full bg-primary/10 p-3 mb-4">
+                  <CheckCircle2 className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No Completed Courses Yet</h3>
+                <p className="text-center text-muted-foreground mb-4">
+                  Once you complete your ongoing courses, they will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Skills acquired section */}
+          {completedCourses.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Skills Acquired</CardTitle>
+                <CardDescription>
+                  Skills you've learned from your completed courses
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {acquiredSkills.map((skill, index) => (
+                    <Badge key={index} variant="secondary" className="px-3 py-1">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         
+        {/* Recommended Courses Tab */}
         <TabsContent value="recommended" className="space-y-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {recommendations.map((course) => (
-              <Card key={course.id} className="overflow-hidden">
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={course.image} 
-                    alt={course.title} 
-                    className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                  />
-                </div>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{course.title}</CardTitle>
-                      <CardDescription className="mt-1">{course.description}</CardDescription>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">AI Recommended Courses</CardTitle>
+              <CardDescription>
+                Based on your profile, learning history, and career goals
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {recommendedCourses.map(course => (
+                  <Card key={course.id} className="overflow-hidden">
+                    <div className="aspect-video w-full overflow-hidden">
+                      <img 
+                        src={course.thumbnail} 
+                        alt={course.title} 
+                        className="object-cover w-full h-full"
+                      />
                     </div>
-                    <Badge variant="outline">{course.platform}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Instructor</p>
-                      <p className="font-medium">{course.instructor}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Duration</p>
-                      <p className="font-medium">{course.duration}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between border-t pt-4">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="mr-1 h-4 w-4" />
-                    AI Recommended
-                  </div>
-                  <Button size="sm">
-                    Enroll Now
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{course.title}</CardTitle>
+                        <Badge variant="outline" className="ml-2">
+                          {course.matchScore}% Match
+                        </Badge>
+                      </div>
+                      <CardDescription>{course.platform} • {course.instructor}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm">{course.description}</p>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {course.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Course
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
-      
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Learning Statistics</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Study Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-2">42.5 hours</div>
-              <p className="text-muted-foreground text-sm">Last 30 days</p>
-              <Progress value={75} className="h-2 mt-4" />
-              <p className="text-sm text-green-600 mt-2">+12% from previous month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Courses Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-2">5</div>
-              <p className="text-muted-foreground text-sm">Since joining</p>
-              <div className="flex gap-2 mt-4">
-                <Badge>NPTEL: 2</Badge>
-                <Badge>Coursera: 2</Badge>
-                <Badge>EdX: 1</Badge>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Skills Acquired</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-2">12</div>
-              <p className="text-muted-foreground text-sm">Verified skills</p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Badge variant="outline">Python</Badge>
-                <Badge variant="outline">React</Badge>
-                <Badge variant="outline">Data Analysis</Badge>
-                <Badge variant="outline">SQL</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+
+      {/* Add Course Modal */}
+      <AddCourseModal
+        isOpen={isAddCourseModalOpen}
+        onClose={() => setIsAddCourseModalOpen(false)}
+        onAdd={handleAddCourse}
+      />
     </div>
   );
 };
