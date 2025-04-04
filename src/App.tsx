@@ -22,12 +22,12 @@ import Calendar from "./pages/Calendar";
 import AIGuidance from "./pages/AIGuidance";
 import Pomodoro from "./pages/Pomodoro";
 import TodoList from "./pages/TodoList";
-import Certifications from "./pages/Certifications";
 import Internships from "./pages/Internships";
 import LearningResources from "./pages/LearningResources";
 import MockInterviews from "./pages/MockInterviews";
 import Opportunities from "./pages/Opportunities";
 import Settings from "./pages/Settings";
+import LearningHub from "./pages/LearningHub";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +183,13 @@ const App = () => {
             <Route path="/settings" element={
               isLoggedIn ? 
               <MainLayout><Settings /></MainLayout> : 
+              <Navigate to="/login" replace />
+            } />
+            
+            {/* New combined Learning Hub route */}
+            <Route path="/learning-hub" element={
+              isLoggedIn ? 
+              <MainLayout><LearningHub /></MainLayout> : 
               <Navigate to="/login" replace />
             } />
             

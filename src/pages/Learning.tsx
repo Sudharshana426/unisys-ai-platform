@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Tabs, 
@@ -15,11 +14,33 @@ import AddCourseModal from "@/components/learning/AddCourseModal";
 import CourseCard from "@/components/learning/CourseCard";
 import { toast } from "sonner";
 
+interface BaseCourse {
+  id: number;
+  title: string;
+  description: string;
+  platform: string;
+  instructor: string;
+  thumbnail: string;
+  skills: string[];
+}
+
+interface CurrentCourse extends BaseCourse {
+  startDate: string;
+  endDate: string;
+  progress: number;
+  url: string;
+}
+
+interface CompletedCourse extends BaseCourse {
+  completionDate: string;
+  certificateUrl: string;
+  duration: string;
+}
+
 const Learning = () => {
   const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
   
-  // Sample data - in a real app, this would come from your backend
-  const [currentCourses, setCurrentCourses] = useState([
+  const [currentCourses, setCurrentCourses] = useState<CurrentCourse[]>([
     {
       id: 1,
       title: "Machine Learning Fundamentals",
@@ -61,7 +82,7 @@ const Learning = () => {
     }
   ]);
 
-  const [completedCourses, setCompletedCourses] = useState([
+  const [completedCourses, setCompletedCourses] = useState<CompletedCourse[]>([
     {
       id: 4,
       title: "Introduction to Python Programming",
@@ -88,7 +109,6 @@ const Learning = () => {
     }
   ]);
 
-  // Recommended courses would be provided by your friend's implementation
   const recommendedCourses = [
     {
       id: 6,
@@ -112,7 +132,6 @@ const Learning = () => {
     }
   ];
 
-  // Extract all skills from completed courses
   const acquiredSkills = [...new Set(
     completedCourses.flatMap(course => course.skills)
   )];
@@ -141,15 +160,16 @@ const Learning = () => {
     const courseToComplete = currentCourses.find(course => course.id === courseId);
     
     if (courseToComplete) {
-      // Remove from current courses
       setCurrentCourses(currentCourses.filter(course => course.id !== courseId));
       
-      // Add to completed courses
-      setCompletedCourses([...completedCourses, {
+      const completedCourse: CompletedCourse = {
         ...courseToComplete,
         completionDate: new Date().toISOString().split('T')[0],
+        certificateUrl: "#",
         duration: calculateDuration(courseToComplete.startDate, courseToComplete.endDate)
-      }]);
+      };
+      
+      setCompletedCourses([...completedCourses, completedCourse]);
       
       toast.success("Course marked as completed!");
     }
@@ -189,7 +209,6 @@ const Learning = () => {
         </div>
       </div>
 
-      {/* Learning statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -244,7 +263,6 @@ const Learning = () => {
         </Card>
       </div>
 
-      {/* Main content tabs */}
       <Tabs defaultValue="current" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="current">Current Courses</TabsTrigger>
@@ -252,7 +270,6 @@ const Learning = () => {
           <TabsTrigger value="recommended">Recommended</TabsTrigger>
         </TabsList>
         
-        {/* Current Courses Tab */}
         <TabsContent value="current" className="space-y-4">
           {currentCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -285,7 +302,6 @@ const Learning = () => {
           )}
         </TabsContent>
         
-        {/* Completed Courses Tab */}
         <TabsContent value="completed" className="space-y-4">
           {completedCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -311,7 +327,6 @@ const Learning = () => {
             </Card>
           )}
           
-          {/* Skills acquired section */}
           {completedCourses.length > 0 && (
             <Card className="mt-6">
               <CardHeader>
@@ -333,7 +348,6 @@ const Learning = () => {
           )}
         </TabsContent>
         
-        {/* Recommended Courses Tab */}
         <TabsContent value="recommended" className="space-y-4">
           <Card>
             <CardHeader>
@@ -386,7 +400,6 @@ const Learning = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add Course Modal */}
       <AddCourseModal
         isOpen={isAddCourseModalOpen}
         onClose={() => setIsAddCourseModalOpen(false)}

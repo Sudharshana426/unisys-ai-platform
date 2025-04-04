@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, BookOpen, Award, FileText, Activity, Code, Github, Briefcase, BarChart2, Clock, ListTodo, GraduationCap } from "lucide-react";
+import { Calendar as CalendarIcon, BookOpen, Award, FileText, Activity, Code, Github, Briefcase, BarChart2, Clock, ListTodo, GraduationCap, Layers } from "lucide-react";
 import { Calendar } from '@/components/ui/calendar';
 import { Link } from 'react-router-dom';
 
@@ -223,16 +222,16 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center">
-              <Briefcase className="h-4 w-4 mr-2" /> Internships
+              <Layers className="h-4 w-4 mr-2" /> Learning Hub
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">12</p>
-            <p className="text-xs text-muted-foreground">new opportunities</p>
+            <p className="text-3xl font-bold">14</p>
+            <p className="text-xs text-muted-foreground">total resources</p>
           </CardContent>
           <CardFooter>
-            <Link to="/internships">
-              <Button variant="ghost" size="sm" className="text-xs h-8">Apply Now</Button>
+            <Link to="/learning-hub">
+              <Button variant="ghost" size="sm" className="text-xs h-8">View All</Button>
             </Link>
           </CardFooter>
         </Card>
