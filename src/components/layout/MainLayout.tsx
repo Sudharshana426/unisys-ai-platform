@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export const MainLayout = ({ children, onLogout }: MainLayoutProps) => {

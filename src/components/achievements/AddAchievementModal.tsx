@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,14 +6,28 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axios from "axios";
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: 'http://localhost:5000',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: true
+});
+
 interface AddAchievementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (achievement: any) => void;
+  onAdd?: (achievement: any) => void;
+  onSave?: (achievement: any) => void;
   type: 'hackathon' | 'competition' | 'paper';
+  initialValues?: any;
+  mode?: 'add' | 'edit';
 }
 
-const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementModalProps) => {
+const AddAchievementModal = ({ isOpen, onClose, onAdd, onSave, type, initialValues, mode = 'add' }: AddAchievementModalProps) => {
   // Common fields
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -34,41 +48,97 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
   const [doi, setDoi] = useState("");
   const [abstract, setAbstract] = useState("");
   
+  useEffect(() => {
+    if (initialValues) {
+      setName(initialValues.name || "");
+      setDate(initialValues.date || "");
+      setPosition(initialValues.position || "");
+      setCategory(initialValues.category || "");
+      setProject(initialValues.project || "");
+      setTeamSize(initialValues.teamSize || "");
+      setTeam(initialValues.team || "Individual");
+      setAuthors(initialValues.authors || "");
+      setPublication(initialValues.publication || "");
+      setDoi(initialValues.doi || "");
+      setAbstract(initialValues.abstract || "");
+      setFile(null);
+    } else {
+      resetForm();
+    }
+  }, [initialValues, isOpen, type]);
+
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  const formData = new FormData();
-  formData.append("type", type);
-  formData.append("name", name);
-  formData.append("date", date);
-  if (position) formData.append("position", position);
-  if (category) formData.append("category", category);
-  if (project) formData.append("project", project);
-  if (teamSize) formData.append("teamSize", teamSize);
-  if (team) formData.append("team", team);
-  if (authors) formData.append("authors", authors);
-  if (publication) formData.append("publication", publication);
-  if (doi) formData.append("doi", doi);
-  if (abstract) formData.append("abstract", abstract);
-  if (file) formData.append("file", file);
-
-  try {
-    const response = await axios.post("http://localhost:5000/api/achievements", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} added successfully!`);
+    e.preventDefault();
     
-    // Fetch updated achievements and update UI
-    onAdd(response.data);
-    
-    resetForm();
-    onClose();
-  } catch (error) {
-    console.error("Error adding achievement:", error);
-    toast.error("Failed to add achievement.");
-  }
-};
+    try {
+      const formData = new FormData();
+      formData.append("type", type);
+      formData.append("name", name);
+      formData.append("date", date);
+      
+      if (type === 'hackathon') {
+        formData.append("position", position);
+        formData.append("category", category);
+        formData.append("project", project);
+        formData.append("teamSize", teamSize);
+      } else if (type === 'competition') {
+        formData.append("position", position);
+        formData.append("category", category);
+        formData.append("team", team);
+      } else if (type === 'paper') {
+        formData.append("authors", authors);
+        formData.append("publication", publication);
+        formData.append("doi", doi);
+        formData.append("abstract", abstract);
+      }
+      
+      if (file) {
+        formData.append("file", file);
+      }
+
+      // Log the actual FormData contents
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      if (mode === 'edit' && initialValues && initialValues._id) {
+        // Edit mode: call onSave
+        if (onSave) {
+          await onSave({
+            _id: initialValues._id,
+            type, name, date, position, category, project, teamSize, team, authors, publication, doi, abstract, file
+          });
+        }
+        onClose();
+        resetForm();
+        return;
+      }
+      // Add mode: call onAdd
+      if (onAdd) {
+        await onAdd({ type, name, date, position, category, project, teamSize, team, authors, publication, doi, abstract, file });
+      }
+      onClose();
+      resetForm();
+    } catch (error: any) {
+      console.error("Error adding achievement:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      let errorMessage = "Failed to add achievement. Please try again.";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 500) {
+        errorMessage = "Server error. Please try again later.";
+      } else if (error.response?.status === 401) {
+        errorMessage = "Unauthorized. Please check your credentials.";
+      } else if (error.response?.status === 403) {
+        errorMessage = "Forbidden. You don't have permission to perform this action.";
+      }
+      
+      toast.error(errorMessage);
+    }
+  };
   
   const resetForm = () => {
     setName("");
@@ -89,13 +159,13 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New {type.charAt(0).toUpperCase() + type.slice(1)}</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}` : `Add New ${type.charAt(0).toUpperCase() + type.slice(1)}`}</DialogTitle>
           <DialogDescription>
-            Enter the details to add it to your achievements.
+            {mode === 'edit' ? 'Update the details and save changes.' : 'Enter the details to add it to your achievements.'}
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 py-4">
             {/* Common fields */}
             <div className="grid grid-cols-4 items-center gap-4">
@@ -217,17 +287,6 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
                     </SelectContent>
                   </Select>
                 </div>
-                
-                {team === "Team" && (
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="teamName" className="text-right">Team Name</Label>
-                    <Input
-                      id="teamName"
-                      placeholder="e.g., Code Crusaders"
-                      className="col-span-3"
-                    />
-                  </div>
-                )}
               </>
             )}
             
@@ -300,7 +359,9 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add {type.charAt(0).toUpperCase() + type.slice(1)}</Button>
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              {mode === 'edit' ? 'Save Changes' : `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

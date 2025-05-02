@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from 'lucide-react';
 
 interface HeaderProps {
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export const Header = ({ onLogout }: HeaderProps) => {
@@ -13,11 +13,13 @@ export const Header = ({ onLogout }: HeaderProps) => {
         <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold">Deep Learning Pathways</h2>
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onLogout}>
-            <LogOut className="h-5 w-5" />
-          </Button>
-        </div>
+        {onLogout && (
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={onLogout}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );

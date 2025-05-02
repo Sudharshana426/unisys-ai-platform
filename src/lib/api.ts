@@ -1,15 +1,13 @@
-
 import { supabase } from './supabase';
 import { toast } from 'sonner';
 import type { UserProgress, ModuleType, UserProfile } from './database';
 
 // User Progress API functions
-export const getUserProgress = async (userId: string) => {
+export const getProgress = async () => {
   try {
     const { data, error } = await supabase
       .from('user_progress')
-      .select('*')
-      .eq('user_id', userId);
+      .select('*');
       
     if (error) throw error;
     return data as UserProgress[];
@@ -19,8 +17,7 @@ export const getUserProgress = async (userId: string) => {
   }
 };
 
-export const updateUserProgress = async (
-  userId: string,
+export const updateProgress = async (
   moduleId: string, 
   completed: boolean,
   score?: number
@@ -29,7 +26,6 @@ export const updateUserProgress = async (
     const { error } = await supabase
       .from('user_progress')
       .upsert({
-        user_id: userId,
         module_id: moduleId,
         completed,
         score: score || null,
@@ -64,12 +60,11 @@ export const getModules = async (category?: string) => {
 };
 
 // User Profile API functions
-export const getUserProfile = async (userId: string) => {
+export const getProfile = async () => {
   try {
     const { data, error } = await supabase
       .from('user_profiles')
       .select('*')
-      .eq('user_id', userId)
       .single();
       
     if (error && error.code !== 'PGRST116') throw error;
@@ -80,7 +75,7 @@ export const getUserProfile = async (userId: string) => {
   }
 };
 
-export const createOrUpdateUserProfile = async (profile: Partial<UserProfile> & { user_id: string }) => {
+export const createOrUpdateProfile = async (profile: Partial<UserProfile>) => {
   try {
     const { error } = await supabase
       .from('user_profiles')

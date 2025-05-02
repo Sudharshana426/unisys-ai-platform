@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { toast } from "sonner";
 
 // Import individual content components
 import LearningResources from './LearningResources';
-import Achievements from './Achievements';
+import { Achievements } from './Achievements';
 import Certifications from './Certifications';
 
 // Type for the add item modal

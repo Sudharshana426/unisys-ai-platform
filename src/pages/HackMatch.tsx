@@ -56,6 +56,29 @@ const SORT_OPTIONS = [
   { value: 'registration', label: 'Registration Count' }
 ] as const;
 
+const sourceColors: Record<string, string> = {
+  Devpost: 'bg-blue-700',
+  HackerEarth: 'bg-orange-700',
+  HackClub: 'bg-pink-700',
+};
+
+function getEventType(h: Hackathon): 'Online' | 'In-Person' | 'Hybrid' {
+  const themes = h.themes.map(t => t.toLowerCase());
+  if (themes.includes('online') || h.location.toLowerCase().includes('online')) return 'Online';
+  if (themes.includes('hybrid') || h.location.toLowerCase().includes('hybrid')) return 'Hybrid';
+  return 'In-Person';
+}
+
+function getBanner(h: Hackathon): string | undefined {
+  return h.thumbnail || '';
+}
+
+const badgeColors: Record<string, string> = {
+  'Online': 'bg-pink-600',
+  'In-Person': 'bg-blue-600',
+  'Hybrid': 'bg-yellow-500',
+};
+
 const HackMatch = () => {
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [filteredHackathons, setFilteredHackathons] = useState<Hackathon[]>([]);
@@ -65,21 +88,20 @@ const HackMatch = () => {
   const [sortOption, setSortOption] = useState<typeof SORT_OPTIONS[number]['value']>('featured');
 
   useEffect(() => {
-    const loadHackathons = async () => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
         const data = await fetchHackathons();
         setHackathons(data);
         setFilteredHackathons(sortHackathons(data, 'featured'));
       } catch (err) {
-        setError('Failed to load hackathons. Please try again later.');
-        console.error('Error loading hackathons:', err);
+        setError('Failed to load hackathons.');
       } finally {
         setLoading(false);
       }
     };
-
-    loadHackathons();
+    load();
   }, []);
 
   useEffect(() => {
@@ -131,10 +153,9 @@ const HackMatch = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold gradient-heading">Hackathons</h1>
-        <p className="text-muted-foreground">Discover upcoming hackathons and competitions</p>
+        <h1 className="text-3xl font-bold gradient-heading">All Hackathons</h1>
+        <p className="text-muted-foreground">Discover upcoming hackathons and competitions from Devpost, HackerEarth, and Hack Club.</p>
       </div>
-
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <Input
@@ -158,87 +179,61 @@ const HackMatch = () => {
           </SelectContent>
         </Select>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredHackathons.map((hackathon) => (
-          <Card key={hackathon.id} className={`flex flex-col ${hackathon.featured ? 'ring-2 ring-primary' : ''}`}>
-            <CardHeader>
-              <div className="flex justify-between items-start gap-4">
-                {hackathon.thumbnail && (
-                  <img 
-                    src={hackathon.thumbnail} 
-                    alt={hackathon.title}
-                    className="w-16 h-16 object-cover rounded-md"
-                  />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="line-clamp-2 text-lg">{hackathon.title}</CardTitle>
-                    {hackathon.featured && (
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    )}
-                  </div>
-                  {hackathon.organization && (
-                    <CardDescription className="mt-1">
-                      by {hackathon.organization}
-                    </CardDescription>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {filteredHackathons.map((h) => {
+          const eventType = getEventType(h);
+          const banner = getBanner(h);
+          return (
+            <a
+              key={h.id}
+              href={h.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow relative bg-gray-900"
+              style={{ minHeight: 260 }}
+            >
+              {banner ? (
+                <img
+                  src={banner}
+                  alt={h.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+              ) : (
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-800 to-gray-700" />
+              )}
+              <div className="absolute top-3 right-3 z-10 flex gap-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white shadow ${badgeColors[eventType]}`}>{eventType}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white shadow ${sourceColors[h.source]}`}>{h.source}</span>
+              </div>
+              <div className="relative z-10 flex flex-col justify-end h-full p-5 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+                <div className="mb-2">
+                  <div className="text-2xl font-bold text-white drop-shadow mb-1 truncate" style={{textShadow: '0 2px 8px #000, 0 1px 0 #000'}}>{h.title}</div>
+                  {h.organization && (
+                    <div className="text-sm text-white/90 font-medium mb-1 truncate" style={{textShadow: '0 1px 4px #000'}}>{h.organization}</div>
                   )}
                 </div>
-                <Badge variant="outline">{hackathon.source}</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {hackathon.timeLeft}
-                  </span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Location</div>
-                  <div className="text-sm text-muted-foreground">
-                    {hackathon.location}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Prize</div>
-                  <div className="text-sm text-muted-foreground">
-                    {hackathon.prize}
-                  </div>
-                </div>
-                {hackathon.registrations && (
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {hackathon.registrations.toLocaleString()} registered
-                    </span>
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  {hackathon.themes.map((theme, i) => (
-                    <Badge key={i} variant="secondary">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {h.themes.slice(0, 3).map((theme, i) => (
+                    <span key={i} className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm" style={{textShadow: '0 1px 4px #000'}}>
                       {theme}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {h.prize && <span className="bg-green-700/80 text-white text-xs px-2 py-0.5 rounded-full" style={{textShadow: '0 1px 4px #000'}}>Prize: {h.prize}</span>}
+                  {h.registrations && <span className="bg-blue-700/80 text-white text-xs px-2 py-0.5 rounded-full" style={{textShadow: '0 1px 4px #000'}}>{h.registrations.toLocaleString()} Registered</span>}
+                </div>
+                <div className="flex flex-col gap-1 text-xs text-white/90" style={{textShadow: '0 1px 4px #000'}}>
+                  <div><span className="font-semibold">Date:</span> {h.deadline || h.timeLeft}</div>
+                  <div><span className="font-semibold">Location:</span> {h.location}</div>
+                </div>
+                {h.description && (
+                  <div className="mt-2 text-xs text-white/80 line-clamp-2" style={{textShadow: '0 1px 4px #000'}}>{h.description}</div>
+                )}
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button asChild className="w-full">
-                <a 
-                  href={hackathon.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center"
-                >
-                  View Details
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </a>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
