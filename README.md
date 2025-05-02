@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 2025-Personalized-Learning
 Personalized Learning Automated System for colleges - https://idea.unisys.com/D8262
 
@@ -106,3 +107,6 @@ Yes it is!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+=======
+
+>>>>>>> 3625b87e82182a0460b6a9a3759f6854e3dcd527

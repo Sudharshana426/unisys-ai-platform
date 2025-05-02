@@ -1,4 +1,5 @@
 import React from 'react';
+<<<<<<< HEAD
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,48 @@ import {
   UserSquare2,
   Rocket
 } from "lucide-react";
+=======
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { 
+  Home, 
+  BookOpen, 
+  Code, 
+  Award, 
+  BarChart2, 
+  Calendar, 
+  FileText, 
+  Briefcase, 
+  GraduationCap, 
+  MessageSquare, 
+  Settings,
+  Clock,
+  ListTodo,
+  Activity,
+  Layers
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Updated navigation items - combining Learning Resources, Achievements, and Certifications into LearningHub
+const navItems = [
+  { name: 'Dashboard', path: '/', icon: Home },
+  { name: 'Learning', path: '/learning', icon: BookOpen },
+  { name: 'Learning Hub', path: '/learning-hub', icon: Layers }, // New combined page
+  { name: 'Coding Platform', path: '/coding', icon: Code },
+  { name: 'GitHub & Projects', path: '/github', icon: FileText },
+  { name: 'Academic Records', path: '/academics', icon: GraduationCap },
+  { name: 'Resume Builder', path: '/resume', icon: FileText },
+  { name: 'SWOT Analysis', path: '/swot', icon: Activity },
+  { name: 'Calendar & Tasks', path: '/calendar', icon: Calendar },
+  { name: 'Internships', path: '/internships', icon: Briefcase },
+  { name: 'AI Guidance', path: '/ai-guidance', icon: MessageSquare },
+  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare },
+  { name: 'Opportunities', path: '/opportunities', icon: BarChart2 },
+  { name: 'Pomodoro Timer', path: '/pomodoro', icon: Clock },
+  { name: 'To-Do List', path: '/todo', icon: ListTodo },
+  { name: 'Settings', path: '/settings', icon: Settings }
+];
+>>>>>>> 3625b87e82182a0460b6a9a3759f6854e3dcd527
 
 interface SidebarProps {
   collapsed: boolean;
