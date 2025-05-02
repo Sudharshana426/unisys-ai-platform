@@ -1,18 +1,16 @@
-
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
-import { TopBar } from './TopBar';
-import { AIAssistant } from '../ai/AIAssistant';
-import { MobileNav } from './MobileNav';
+import { Header } from './Header';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  onLogout: () => void;
 }
 
-export const MainLayout = ({ children }: MainLayoutProps) => {
+export const MainLayout = ({ children, onLogout }: MainLayoutProps) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -23,9 +21,9 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar collapsed={sidebarCollapsed} />
       
-      <div className={`flex flex-col flex-1 overflow-x-hidden transition-all duration-300 ${sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
-        <TopBar />
-        <div className="relative">
+      <div className={`flex flex-col flex-1 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}>
+        <Header onLogout={onLogout} />
+        <div className="relative flex-1">
           <div 
             className="absolute -left-3 top-4 z-50 hidden md:block"
             onClick={toggleSidebar}
@@ -47,11 +45,10 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <main className="flex-1 p-4 md:p-6 pb-16 overflow-y-auto">
+          <main className="h-[calc(100vh-4rem)] p-6 overflow-y-auto">
             {children}
           </main>
         </div>
-        <AIAssistant />
       </div>
     </div>
   );

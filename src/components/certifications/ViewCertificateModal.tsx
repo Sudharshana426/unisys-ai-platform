@@ -1,8 +1,5 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Download, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ViewCertificateModalProps {
   isOpen: boolean;
@@ -17,56 +14,29 @@ interface ViewCertificateModalProps {
 const ViewCertificateModal = ({ isOpen, onClose, certificate }: ViewCertificateModalProps) => {
   if (!certificate) return null;
 
-  const handleDownload = () => {
-    if (certificate.fileURL) {
-      const link = document.createElement('a');
-      link.href = certificate.fileURL;
-      link.download = certificate.fileName || 'certificate.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-  
+  const isPDF = certificate.fileName.toLowerCase().endsWith('.pdf');
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] h-[600px]">
         <DialogHeader>
-          <DialogTitle>Certificate: {certificate.name}</DialogTitle>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-4 top-4"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <DialogTitle>{certificate.name}</DialogTitle>
         </DialogHeader>
-        
-        <div className="flex flex-col items-center justify-center py-4">
-          {certificate.fileURL && (
-            certificate.fileURL.endsWith('.pdf') ? (
-              <iframe 
-                src={certificate.fileURL} 
-                className="w-full h-[500px]" 
-                title={certificate.name}
-              />
-            ) : (
-              <img 
-                src={certificate.fileURL} 
-                alt={certificate.name} 
-                className="max-w-full max-h-[500px] object-contain"
-              />
-            )
+        <div className="flex-1 h-full overflow-hidden">
+          {isPDF ? (
+            <iframe
+              src={certificate.fileURL}
+              className="w-full h-full"
+              title={certificate.name}
+            />
+          ) : (
+            <img
+              src={certificate.fileURL}
+              alt={certificate.name}
+              className="w-full h-full object-contain"
+            />
           )}
         </div>
-        
-        <DialogFooter>
-          <Button onClick={handleDownload} className="flex items-center gap-1">
-            <Download className="h-4 w-4" />
-            Download
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

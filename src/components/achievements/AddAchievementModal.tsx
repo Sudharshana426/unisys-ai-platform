@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import axios from "axios";
 interface AddAchievementModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,57 +34,41 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
   const [doi, setDoi] = useState("");
   const [abstract, setAbstract] = useState("");
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Create URL for the uploaded file
-    const fileURL = file ? URL.createObjectURL(file) : "";
-    
-    // Create new achievement object based on type
-    let newAchievement: any = {
-      id: Date.now(),
-      fileURL,
-      fileName: file?.name || ""
-    };
-    
-    if (type === 'hackathon') {
-      newAchievement = {
-        ...newAchievement,
-        name,
-        date,
-        position,
-        category,
-        project,
-        teamSize: parseInt(teamSize) || 1,
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
-      };
-    } else if (type === 'competition') {
-      newAchievement = {
-        ...newAchievement,
-        name,
-        date,
-        position,
-        category,
-        team,
-        certificate: file !== null
-      };
-    } else if (type === 'paper') {
-      newAchievement = {
-        ...newAchievement,
-        title: name,
-        authors,
-        publication,
-        date,
-        doi,
-        abstract
-      };
-    }
-    
-    onAdd(newAchievement);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  const formData = new FormData();
+  formData.append("type", type);
+  formData.append("name", name);
+  formData.append("date", date);
+  if (position) formData.append("position", position);
+  if (category) formData.append("category", category);
+  if (project) formData.append("project", project);
+  if (teamSize) formData.append("teamSize", teamSize);
+  if (team) formData.append("team", team);
+  if (authors) formData.append("authors", authors);
+  if (publication) formData.append("publication", publication);
+  if (doi) formData.append("doi", doi);
+  if (abstract) formData.append("abstract", abstract);
+  if (file) formData.append("file", file);
+
+  try {
+    const response = await axios.post("http://localhost:5000/api/achievements", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} added successfully!`);
+    
+    // Fetch updated achievements and update UI
+    onAdd(response.data);
+    
     resetForm();
     onClose();
-  };
+  } catch (error) {
+    console.error("Error adding achievement:", error);
+    toast.error("Failed to add achievement.");
+  }
+};
   
   const resetForm = () => {
     setName("");
@@ -293,6 +276,7 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
                     id="abstract"
                     value={abstract}
                     onChange={(e) => setAbstract(e.target.value)}
+                    placeholder="Brief description of the paper"
                     className="col-span-3"
                     required
                   />
@@ -300,25 +284,22 @@ const AddAchievementModal = ({ isOpen, onClose, onAdd, type }: AddAchievementMod
               </>
             )}
             
-            {/* File upload for all types */}
+            {/* File upload field */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="file" className="text-right">
-                {type === 'hackathon' ? 'Project Image/PDF' : 
-                 type === 'competition' ? 'Certificate' : 'Paper PDF'}
-              </Label>
+              <Label htmlFor="file" className="text-right">Certificate/File</Label>
               <Input
                 id="file"
                 type="file"
-                accept={type === 'paper' ? ".pdf" : ".pdf,.jpg,.jpeg,.png"}
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                 className="col-span-3"
-                required
               />
             </div>
           </div>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit">Add {type.charAt(0).toUpperCase() + type.slice(1)}</Button>
           </DialogFooter>
         </form>

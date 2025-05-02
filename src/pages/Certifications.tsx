@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -10,125 +9,97 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Award, Calendar, Download, ExternalLink, File, Filter, Plus, Search } from "lucide-react";
 import AddCertificationModal from "@/components/certifications/AddCertificationModal";
 import ViewCertificateModal from "@/components/certifications/ViewCertificateModal";
+import axios from 'axios';
+import { toast } from "sonner";
 
-const initialCertifications = [
-  {
-    id: 1,
-    name: "AWS Certified Solutions Architect",
-    provider: "Amazon Web Services",
-    issueDate: "Jan 2023",
-    expiryDate: "Jan 2026",
-    credentialID: "AWS-12345-CSA",
-    skills: ["Cloud Architecture", "AWS Services", "Infrastructure Design"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    name: "TensorFlow Developer Certificate",
-    provider: "Google",
-    issueDate: "Mar 2023",
-    expiryDate: "Mar 2026",
-    credentialID: "TF-78901-DEV",
-    skills: ["Machine Learning", "Deep Learning", "TensorFlow", "Neural Networks"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 3,
-    name: "Full Stack Web Development",
-    provider: "Udacity",
-    issueDate: "Jun 2022",
-    expiryDate: "N/A (No Expiry)",
-    credentialID: "UD-56789-FSWD",
-    skills: ["React", "Node.js", "MongoDB", "REST APIs"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 4,
-    name: "Microsoft Certified: Azure Developer Associate",
-    provider: "Microsoft",
-    issueDate: "Dec 2022",
-    expiryDate: "Dec 2024",
-    credentialID: "MS-24680-ADA",
-    skills: ["Azure Services", "Cloud Development", "Azure Functions"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 5,
-    name: "Oracle Certified Professional: Java SE Programmer",
-    provider: "Oracle",
-    issueDate: "Sep 2022",
-    expiryDate: "No Expiry",
-    credentialID: "OCP-13579-JSP",
-    skills: ["Java", "OOP", "Data Structures", "Algorithms"],
-    logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=50&h=50&fit=crop",
-    fileURL: "",
-    fileName: ""
-  }
-];
-
-const recommendedCertifications = [
-  {
-    id: 1,
-    name: "Google Cloud Professional Data Engineer",
-    provider: "Google",
-    difficulty: "Advanced",
-    duration: "3 months",
-    cost: "$200",
-    relevance: 95,
-    skills: ["GCP", "BigQuery", "Machine Learning", "Data Pipelines"]
-  },
-  {
-    id: 2,
-    name: "Kubernetes Application Developer (CKAD)",
-    provider: "Cloud Native Computing Foundation",
-    difficulty: "Intermediate",
-    duration: "2 months",
-    cost: "$300",
-    relevance: 88,
-    skills: ["Kubernetes", "Docker", "Containers", "Microservices"]
-  },
-  {
-    id: 3,
-    name: "CompTIA Security+",
-    provider: "CompTIA",
-    difficulty: "Intermediate",
-    duration: "2-3 months",
-    cost: "$370",
-    relevance: 82,
-    skills: ["Network Security", "Cryptography", "Identity Management"]
-  }
-];
+const API_URL = 'http://localhost:5000/api';
 
 const Certifications = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [certifications, setCertifications] = useState(initialCertifications);
+  const [certifications, setCertifications] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
-  
-  const filteredCertifications = certifications.filter(cert => 
-    cert.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    cert.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cert.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleAddCertification = (newCertification: any) => {
-    setCertifications([...certifications, newCertification]);
+  useEffect(() => {
+    fetchCertifications();
+  }, []);
+
+  const fetchCertifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/certifications`);
+      if (response.data) {
+        setCertifications(response.data);
+        setError(null);
+      } else {
+        setError('No data received from server');
+      }
+    } catch (err) {
+      console.error("Error fetching certifications:", err);
+      setError(err.response?.data?.message || 'Failed to fetch certifications');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const viewCertificate = (certificate: any) => {
+  const handleAddCertification = async (newCertification) => {
+    try {
+      const formData = new FormData();
+      Object.keys(newCertification).forEach(key => {
+        if (key === 'skills') {
+          formData.append(key, JSON.stringify(newCertification[key]));
+        } else if (key === 'file' && newCertification[key]) {
+          formData.append('certificate', newCertification[key]);
+        } else {
+          formData.append(key, newCertification[key]);
+        }
+      });
+
+      const response = await axios.post(`${API_URL}/certifications`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+      });
+
+      if (response.data) {
+        setCertifications(prevCerts => [...prevCerts, response.data]);
+        setIsAddModalOpen(false);
+        toast.success("Certification added successfully!");
+      } else {
+        toast.error("Failed to add certification: No data received");
+      }
+    } catch (err) {
+      console.error("Error adding certification:", err);
+      toast.error(err.response?.data?.message || "Failed to add certification");
+    }
+  };
+
+  const handleDeleteCertification = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/certifications/${id}`);
+      setCertifications(certifications.filter(cert => cert._id !== id));
+    } catch (err) {
+      setError('Failed to delete certification');
+    }
+  };
+
+  const viewCertificate = (certificate) => {
     setSelectedCertificate(certificate);
     setIsViewModalOpen(true);
   };
-  
+
+  const filteredCertifications = certifications.filter(cert => 
+    cert.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    cert.issuingOrganization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cert.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -162,21 +133,14 @@ const Certifications = () => {
       
       <Tabs defaultValue="active">
         <TabsList className="mb-4">
-          <TabsTrigger value="active">
-            Active Certifications
-          </TabsTrigger>
-          <TabsTrigger value="expired">
-            Expired
-          </TabsTrigger>
-          <TabsTrigger value="recommended">
-            Recommended
-          </TabsTrigger>
+          <TabsTrigger value="active">Active Certifications</TabsTrigger>
+          <TabsTrigger value="expired">Expired</TabsTrigger>
         </TabsList>
         
         <TabsContent value="active" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredCertifications.filter(cert => !cert.expiryDate.includes("Expired")).map((certification) => (
-              <Card key={certification.id}>
+            {filteredCertifications.filter(cert => !cert.expiryDate?.includes("Expired")).map((certification) => (
+              <Card key={certification._id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -184,13 +148,12 @@ const Certifications = () => {
                         {certification.name}
                       </CardTitle>
                       <CardDescription>
-                        {certification.provider}
+                        {certification.issuingOrganization}
                       </CardDescription>
                     </div>
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={certification.logo} alt={certification.provider} />
                       <AvatarFallback className="bg-primary text-primary-foreground">
-                        {certification.provider.substring(0, 2).toUpperCase()}
+                        {certification.issuingOrganization.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -199,7 +162,7 @@ const Certifications = () => {
                   <div className="grid grid-cols-2 gap-2 text-sm mb-4">
                     <div>
                       <p className="text-muted-foreground">Issue Date</p>
-                      <p className="font-medium">{certification.issueDate}</p>
+                      <p className="font-medium">{certification.dateIssued}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Expiry Date</p>
@@ -207,7 +170,7 @@ const Certifications = () => {
                     </div>
                     <div className="col-span-2">
                       <p className="text-muted-foreground">Credential ID</p>
-                      <p className="font-medium">{certification.credentialID}</p>
+                      <p className="font-medium">{certification.credentialId}</p>
                     </div>
                   </div>
                   
@@ -218,9 +181,12 @@ const Certifications = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between border-t pt-4">
-                  <Button variant="outline" size="sm">
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteCertification(certification._id)}
+                  >
+                    Delete
                   </Button>
                   <Button 
                     size="sm" 
@@ -235,145 +201,65 @@ const Certifications = () => {
           </div>
         </TabsContent>
         
-        <TabsContent value="expired">
+        <TabsContent value="expired" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredCertifications.filter(cert => cert.expiryDate.includes("Expired")).length > 0 ? (
-              filteredCertifications
-                .filter(cert => cert.expiryDate.includes("Expired"))
-                .map((certification) => (
-                  <Card key={certification.id} className="border-dashed bg-muted/40">
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2 text-muted-foreground">
-                            {certification.name}
-                            <Badge variant="outline" className="text-red-500 border-red-500">Expired</Badge>
-                          </CardTitle>
-                          <CardDescription>
-                            {certification.provider}
-                          </CardDescription>
-                        </div>
-                        <Avatar className="h-10 w-10 opacity-70">
-                          <AvatarImage src={certification.logo} alt={certification.provider} />
-                          <AvatarFallback className="bg-muted">
-                            {certification.provider.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                        <div>
-                          <p className="text-muted-foreground">Issue Date</p>
-                          <p className="font-medium">{certification.issueDate}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Expiry Date</p>
-                          <p className="font-medium text-red-500">{certification.expiryDate}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-muted-foreground">Credential ID</p>
-                          <p className="font-medium">{certification.credentialID}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {certification.skills.map((skill, index) => (
-                          <Badge key={index} variant="outline" className="opacity-70">{skill}</Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between border-t pt-4">
-                      <Button variant="outline" size="sm">
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Renew
-                      </Button>
-                    </CardFooter>
-                  </Card>
-              ))
-            ) : (
-              <div className="col-span-2 text-center p-12 border rounded-lg">
-                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No Expired Certifications!</h3>
-                <p className="text-muted-foreground mb-4">You don't have any expired certifications at the moment.</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="recommended">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recommendedCertifications.map((cert) => (
-              <Card key={cert.id}>
-                <CardHeader>
-                  <div className="flex justify-between">
-                    <div>
-                      <CardTitle>{cert.name}</CardTitle>
-                      <CardDescription>{cert.provider}</CardDescription>
-                    </div>
-                    <div className="border rounded-full px-2 py-1 text-xs flex items-center gap-1">
-                      <span className="text-muted-foreground">Relevance:</span>
-                      <span className="font-bold">{cert.relevance}%</span>
+            {filteredCertifications.filter(cert => cert.expiryDate?.includes("Expired")).map((certification) => (
+              <Card key={certification._id} className="border-dashed bg-muted/40">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                        {certification.name}
+                        <Badge variant="outline" className="text-red-500 border-red-500">Expired</Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        {certification.issuingOrganization}
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">Difficulty</p>
-                      <p className="text-sm font-medium">{cert.difficulty}</p>
+                      <p className="text-muted-foreground">Issue Date</p>
+                      <p className="font-medium">{certification.dateIssued}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Duration</p>
-                      <p className="text-sm font-medium">{cert.duration}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Cost</p>
-                      <p className="text-sm font-medium">{cert.cost}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium mb-2">Skills you'll gain</p>
-                    <div className="flex flex-wrap gap-2">
-                      {cert.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary">{skill}</Badge>
-                      ))}
+                      <p className="text-muted-foreground">Expiry Date</p>
+                      <p className="font-medium">{certification.expiryDate}</p>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between border-t pt-4">
-                  <Button variant="outline" size="sm">Learn More</Button>
-                  <Button size="sm">Add to Goals</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteCertification(certification._id)}
+                  >
+                    Delete
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
-            
-            <Card className="border-dashed bg-muted/40 flex flex-col items-center justify-center p-8 text-center">
-              <File className="h-10 w-10 mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Looking for more?</h3>
-              <p className="text-sm text-muted-foreground mb-4">Take a skill assessment to get personalized certification recommendations.</p>
-              <Button>Take Assessment</Button>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>
-      
-      <AddCertificationModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddCertification}
-      />
-      
-      <ViewCertificateModal
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        certificate={selectedCertificate}
-      />
+
+      {isAddModalOpen && (
+        <AddCertificationModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddCertification}
+        />
+      )}
+
+      {isViewModalOpen && selectedCertificate && (
+        <ViewCertificateModal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          certificate={selectedCertificate}
+        />
+      )}
     </div>
   );
 };

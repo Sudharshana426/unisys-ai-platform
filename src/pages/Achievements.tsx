@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,149 +6,82 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Award, Calendar, Code, ExternalLink, FileText, Plus, Search, Trophy } from "lucide-react";
 import AddAchievementModal from '@/components/achievements/AddAchievementModal';
 import ViewCertificateModal from '@/components/certifications/ViewCertificateModal';
+import axios from 'axios';
+import { toast } from "sonner";
 
-const initialHackathons = [
-  {
-    id: 1,
-    name: "SIH Hackathon 2023",
-    date: "March 15-17, 2023",
-    position: "Winner",
-    category: "Smart Education",
-    project: "AI-Powered Learning Assistant",
-    teamSize: 5,
-    image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    name: "Google Solutions Challenge",
-    date: "January 24-26, 2023",
-    position: "2nd Place",
-    category: "Sustainability",
-    project: "EcoTrack - Campus Sustainability Monitor",
-    teamSize: 4,
-    image: "https://images.unsplash.com/photo-1526378800651-c32d170fe6f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 3,
-    name: "Microsoft Imagine Cup 2023",
-    date: "December 10-12, 2022",
-    position: "Finalist",
-    category: "Earth",
-    project: "WaterSense - Smart Water Management",
-    teamSize: 3,
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    fileURL: "",
-    fileName: ""
-  }
-];
-
-const initialCompetitions = [
-  {
-    id: 1,
-    name: "ACM ICPC Regionals",
-    date: "November 18, 2023",
-    position: "6th Rank",
-    category: "Competitive Programming",
-    team: "Code Crusaders",
-    certificate: true,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    name: "Google Kickstart Round D",
-    date: "July 23, 2023",
-    position: "Top 15%",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: true,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 3,
-    name: "Codeforces Global Round 25",
-    date: "June 8, 2023",
-    position: "Division 1 (2146 Rating)",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: false,
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 4,
-    name: "LeetCode Weekly Contest 312",
-    date: "May 14, 2023",
-    position: "Top 5% (3/4 problems)",
-    category: "Competitive Programming",
-    team: "Individual",
-    certificate: false,
-    fileURL: "",
-    fileName: ""
-  }
-];
-
-const initialPapers = [
-  {
-    id: 1,
-    title: "Machine Learning Approaches for Educational Data Mining",
-    authors: "Sharma R., Patel V., Gupta S.",
-    publication: "IEEE International Conference on Educational Technology",
-    date: "June 2023",
-    doi: "10.1109/ICET.2023.123456",
-    abstract: "This paper explores various machine learning techniques for analyzing educational data to improve student outcomes and personalize learning experiences.",
-    fileURL: "",
-    fileName: ""
-  },
-  {
-    id: 2,
-    title: "Blockchain-Based Certificate Verification System for Academic Credentials",
-    authors: "Sharma R., Kumar A.",
-    publication: "Journal of Educational Technology & Society",
-    date: "March 2023",
-    doi: "10.2307/JETS.2023.789012",
-    abstract: "We propose a secure and tamper-proof blockchain framework for issuing and verifying academic credentials to prevent certificate fraud.",
-    fileURL: "",
-    fileName: ""
-  }
-];
+const API_URL = 'http://localhost:5000/api';
 
 const Achievements = () => {
-  const [hackathons, setHackathons] = useState(initialHackathons);
-  const [competitions, setCompetitions] = useState(initialCompetitions);
-  const [papers, setPapers] = useState(initialPapers);
-  
+  const [achievements, setAchievements] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'hackathon' | 'competition' | 'paper'>('hackathon');
-  
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<any>(null);
-  
-  const handleAddAchievement = (achievement: any) => {
-    if (modalType === 'hackathon') {
-      setHackathons([...hackathons, achievement]);
-    } else if (modalType === 'competition') {
-      setCompetitions([...competitions, achievement]);
-    } else if (modalType === 'paper') {
-      setPapers([...papers, achievement]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchAchievements();
+  }, []);
+
+  const fetchAchievements = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/achievements`);
+      setAchievements(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch achievements');
+      toast.error('Failed to fetch achievements');
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const openAddModal = (type: 'hackathon' | 'competition' | 'paper') => {
-    setModalType(type);
-    setIsAddModalOpen(true);
+
+  const handleAddAchievement = async (achievement) => {
+    try {
+      const response = await axios.post(`${API_URL}/achievements`, achievement);
+      setAchievements([...achievements, response.data]);
+      setIsAddModalOpen(false);
+      toast.success('Achievement added successfully!');
+    } catch (err) {
+      toast.error('Failed to add achievement');
+    }
   };
-  
-  const viewFile = (file: any) => {
-    setSelectedFile(file);
+
+  const handleDeleteAchievement = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/achievements/${id}`);
+      setAchievements(achievements.filter(a => a._id !== id));
+      toast.success('Achievement deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete achievement');
+    }
+  };
+
+  const viewFile = (achievement) => {
+    console.log("Viewing file:", achievement);
+    const fileURL = achievement.fileURL 
+      ? `http://localhost:5000${achievement.fileURL}` 
+      : null;
+    console.log("Constructed fileURL:", fileURL);
+    setSelectedFile({
+      name: achievement.name,
+      fileURL: fileURL,
+      fileName: achievement.fileName || "document.pdf"
+    });
     setIsViewModalOpen(true);
   };
-  
+
+  const filteredAchievements = {
+    hackathons: achievements.filter(a => a.type === 'hackathon'),
+    competitions: achievements.filter(a => a.type === 'competition'),
+    papers: achievements.filter(a => a.type === 'paper')
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -180,20 +112,20 @@ const Achievements = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{hackathons.length}</p>
+              <p className="text-2xl font-bold">{filteredAchievements.hackathons.length}</p>
               <p className="text-sm text-muted-foreground">Hackathon Wins</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{competitions.length}</p>
+              <p className="text-2xl font-bold">{filteredAchievements.competitions.length}</p>
               <p className="text-sm text-muted-foreground">Coding Competitions</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold">{papers.length}</p>
+              <p className="text-2xl font-bold">{filteredAchievements.papers.length}</p>
               <p className="text-sm text-muted-foreground">Research Papers</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
               <p className="text-2xl font-bold">
-                {competitions.filter(c => c.certificate).length}
+                {achievements.filter(a => a.fileURL).length}
               </p>
               <p className="text-sm text-muted-foreground">Certificates</p>
             </div>
@@ -210,19 +142,22 @@ const Achievements = () => {
         
         <TabsContent value="hackathons" className="space-y-4">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('hackathon')} size="sm">
+            <Button onClick={() => {
+              setModalType('hackathon');
+              setIsAddModalOpen(true);
+            }} size="sm">
               <Plus className="mr-2 h-4 w-4" />
               Add Hackathon
             </Button>
           </div>
           
-          {hackathons.map((hackathon) => (
-            <Card key={hackathon.id}>
+          {filteredAchievements.hackathons.map((hackathon) => (
+            <Card key={hackathon._id}>
               <div className="md:flex">
                 <div className="md:w-1/4">
                   <div className="h-48 md:h-full overflow-hidden">
                     <img 
-                      src={hackathon.image} 
+                      src={hackathon.fileURL ? `http://localhost:5000${hackathon.fileURL}` : 'https://via.placeholder.com/400x300'} 
                       alt={hackathon.name} 
                       className="w-full h-full object-cover"
                     />
@@ -258,26 +193,23 @@ const Achievements = () => {
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="border-t pt-4">
-                    <div className="flex gap-2 ml-auto">
+                  <CardFooter className="flex justify-between border-t pt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteAchievement(hackathon._id)}
+                    >
+                      Delete
+                    </Button>
+                    {hackathon.fileURL && (
                       <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => viewFile({
-                          name: hackathon.name, 
-                          fileURL: hackathon.fileURL,
-                          fileName: hackathon.fileName
-                        })}
-                        disabled={!hackathon.fileURL}
+                        size="sm" 
+                        onClick={() => viewFile(hackathon)}
                       >
-                        <FileText className="mr-2 h-4 w-4" />
+                        <ExternalLink className="mr-2 h-4 w-4" />
                         View Certificate
                       </Button>
-                      <Button size="sm">
-                        <Code className="mr-2 h-4 w-4" />
-                        Project Details
-                      </Button>
-                    </div>
+                    )}
                   </CardFooter>
                 </div>
               </div>
@@ -285,128 +217,131 @@ const Achievements = () => {
           ))}
         </TabsContent>
         
-        <TabsContent value="competitions">
+        <TabsContent value="competitions" className="space-y-4">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('competition')} size="sm">
+            <Button onClick={() => {
+              setModalType('competition');
+              setIsAddModalOpen(true);
+            }} size="sm">
               <Plus className="mr-2 h-4 w-4" />
               Add Competition
             </Button>
           </div>
           
-          <div className="space-y-4">
-            {competitions.map((competition) => (
-              <Card key={competition.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{competition.name}</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        <Calendar className="h-4 w-4 mr-1" /> {competition.date}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="outline">{competition.position}</Badge>
+          {filteredAchievements.competitions.map((competition) => (
+            <Card key={competition._id}>
+              <div className="md:flex">
+                <div className="md:w-1/4">
+                  <div className="h-48 md:h-full overflow-hidden">
+                    <img 
+                      src={competition.fileURL ? `http://localhost:5000${competition.fileURL}` : 'https://via.placeholder.com/400x300'} 
+                      alt={competition.name} 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Category</p>
-                      <p className="font-medium">{competition.category}</p>
+                </div>
+                <div className="md:w-3/4">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{competition.name}</CardTitle>
+                        <CardDescription className="flex items-center mt-1">
+                          <Calendar className="h-4 w-4 mr-1" /> {competition.date}
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline">{competition.position}</Badge>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Participation</p>
-                      <p className="font-medium">{competition.team}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Category</p>
+                        <p className="font-medium">{competition.category}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Team</p>
+                        <p className="font-medium">{competition.team}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Certificate</p>
-                      <p className="font-medium">{competition.certificate ? "Yes" : "No"}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                  {competition.certificate && (
+                  </CardContent>
+                  <CardFooter className="flex justify-between border-t pt-4">
                     <Button 
-                      size="sm" 
-                      className="ml-auto"
-                      onClick={() => viewFile({
-                        name: competition.name,
-                        fileURL: competition.fileURL,
-                        fileName: competition.fileName
-                      })}
-                      disabled={!competition.fileURL}
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteAchievement(competition._id)}
                     >
-                      <Award className="mr-2 h-4 w-4" />
-                      View Certificate
+                      Delete
                     </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                    {competition.fileURL && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => viewFile(competition)}
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View Certificate
+                      </Button>
+                    )}
+                  </CardFooter>
+                </div>
+              </div>
+            </Card>
+          ))}
         </TabsContent>
         
-        <TabsContent value="papers">
+        <TabsContent value="papers" className="space-y-4">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => openAddModal('paper')} size="sm">
+            <Button onClick={() => {
+              setModalType('paper');
+              setIsAddModalOpen(true);
+            }} size="sm">
               <Plus className="mr-2 h-4 w-4" />
               Add Paper
             </Button>
           </div>
           
-          <div className="space-y-4">
-            {papers.map((paper) => (
-              <Card key={paper.id}>
-                <CardHeader>
-                  <CardTitle>{paper.title}</CardTitle>
-                  <CardDescription>{paper.authors}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Publication</p>
-                      <p className="font-medium">{paper.publication}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">{paper.date}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">DOI</p>
-                      <p className="font-medium">{paper.doi}</p>
-                    </div>
+          {filteredAchievements.papers.map((paper) => (
+            <Card key={paper._id}>
+              <CardHeader>
+                <CardTitle>{paper.name}</CardTitle>
+                <CardDescription className="flex items-center mt-1">
+                  <Calendar className="h-4 w-4 mr-1" /> {paper.date}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Category</p>
+                    <p className="font-medium">{paper.category}</p>
                   </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground">Abstract</p>
-                    <p className="text-sm mt-1">{paper.abstract}</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Project</p>
+                    <p className="font-medium">{paper.project}</p>
                   </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                  <div className="flex gap-2 ml-auto">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => viewFile({
-                        name: paper.title,
-                        fileURL: paper.fileURL,
-                        fileName: paper.fileName
-                      })}
-                      disabled={!paper.fileURL}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
-                    <Button size="sm">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      View Publication
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t pt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleDeleteAchievement(paper._id)}
+                >
+                  Delete
+                </Button>
+                {paper.fileURL && (
+                  <Button 
+                    size="sm" 
+                    onClick={() => viewFile(paper)}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    View Paper
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          ))}
         </TabsContent>
       </Tabs>
-      
+
       <AddAchievementModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

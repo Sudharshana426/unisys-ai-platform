@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,14 +21,20 @@ const Login = () => {
     setError(null);
     setLoading(true);
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // TODO: Implement actual login logic
-      // For now, just simulate a successful login
+      // TODO: Implement actual registration logic
+      // For now, just simulate a successful registration
       await new Promise(resolve => setTimeout(resolve, 1000));
       login('dummy-token');
       navigate('/dashboard');
     } catch (err) {
-      setError('Login failed. Please check your credentials and try again.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -37,8 +44,8 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Sign in to your Deep Learning Pathways account</CardDescription>
+          <CardTitle>Create an Account</CardTitle>
+          <CardDescription>Join Deep Learning Pathways to start your journey</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,16 +74,25 @@ const Login = () => {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </CardFooter>
@@ -85,4 +101,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Register; 
