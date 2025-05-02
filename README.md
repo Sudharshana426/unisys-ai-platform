@@ -1,4 +1,49 @@
-# Welcome to your Lovable project
+# 2025-Personalized-Learning
+Personalized Learning Automated System for colleges - https://idea.unisys.com/D8262
+
+## Project Overview
+This project is a personalized learning system designed for colleges, built with modern web technologies.
+
+## Technologies Used
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## Getting Started
+
+### Prerequisites
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+### Installation Steps
+```sh
+# Step 1: Clone the repository
+git clone https://github.com/UnisysUIP/2025-Personalized-Learning.git
+
+# Step 2: Navigate to the project directory
+cd 2025-Personalized-Learning
+
+# Step 3: Install dependencies
+npm i
+
+# Step 4: Start the development server
+npm run dev
+```
+
+## Development Options
+
+### Using GitHub
+- Navigate to the desired file(s)
+- Click the "Edit" button (pencil icon)
+- Make your changes and commit
+
+### Using GitHub Codespaces
+- Navigate to the main page of the repository
+- Click on the "Code" button (green button)
+- Select the "Codespaces" tab
+- Click on "New codespace" to launch a new environment
+- Edit files directly within the Codespace and commit your changes
 
 ## Project info
 
@@ -49,16 +94,6 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
 
 ## How can I deploy this project?
 
